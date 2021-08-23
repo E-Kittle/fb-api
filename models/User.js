@@ -15,4 +15,8 @@ let UserSchema = new Schema(
     }
 )
 
+UserSchema.virtual('temp_img').get(function() {
+    return first_name.slice(0,1) + second_name.slice(0,1);
+})
+
 module.exports = mongoose.model('User', UserSchema);

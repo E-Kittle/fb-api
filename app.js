@@ -5,15 +5,22 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();         //Import environmental variables
 
-
-
-
+// Authentication middleware
+require('./managers/passport');      //Require the custom jwt strategy
 
 var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
 
 var app = express();
+
+// Connect to database
+mongoose.connect(process.env.DB_URL, { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false, useCreateIndex: true});
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, "mongo connection error"));
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
