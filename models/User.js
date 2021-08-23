@@ -10,8 +10,8 @@ let UserSchema = new Schema(
         bio: {type:String},
         profile_img: {type:String},
         profile_banner: {type:String},
-        friend_requests: {type:Schema.Types.ObjectId, ref='User'},
-        friends: {type:Schema.Types.ObjectId, ref='User'}
+        friend_requests: {type: Schema.Types.ObjectId, ref:'User'},
+        friends: {type:Schema.Types.ObjectId, ref:'User'}
     }
 )
 

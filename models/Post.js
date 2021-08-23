@@ -3,12 +3,12 @@ const Schema = mongoose.Schema;
 
 let PostSchema = new Schema(
     {
-        author: {type:Schema.Types.ObjectId, ref='User', required:true},
+        author: {type:Schema.Types.ObjectId, ref:'User', required:true},
         content: {type:String},
         photos: {type:String},
         likes: {type:Number, required:true, default:0},
         comments: [{
-            type:Schema.Types.ObjectId, ref='User'
+            type:Schema.Types.ObjectId, ref:'User'
         }],
     }
 )
