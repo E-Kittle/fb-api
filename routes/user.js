@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const passport = require('passport');
 const userController = require('../controllers/userController')
 
 // Signup new user
@@ -11,19 +12,27 @@ router.get('/:id/posts', userController.get_user_posts);
 
 
 
-// Grabs friend list. If req.query.allfriends = true, then also return friend requests
-router.get('/:id/friends', userController.get_user_friends);
+// These two routes grab friend lists. 
+// Client can add '?all=true' if they want to view friend requests as well,
+// but the request must be for the current user. 
+router.get('/friends', passport.authenticate('jwt', { session: false }), userController.get_user_friends);
+
+router.get('/:id/friends', passport.authenticate('jwt', { session: false }), userController.get_user_friends);
+
+
+// Grabs friend requests
+router.get('/friendreq', userController.get_friend_requests);
 
 //Create a new friend request
-router.post('/:id/friendreq/:friendid', userController.create_friend_request);
+router.post('/friendreq/:id', userController.create_friend_request);
 
 // Reject a friend request
-router.delete('/:id/friendreq/:friendid', userController.reject_friend_request);
+router.delete('/friendreq/:id', userController.reject_friend_request);
 
 // accept a friend request
-router.put('/:id/friendreq/:friendid', userController.accept_friend_request);
+router.put('/friendreq/:id', userController.accept_friend_request);
 
 // Delete a friend 
-router.delete('/:id/friend/:friendid', userController.remove_friend);
+router.delete('/friend/:id', userController.remove_friend);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const FriendRequest = require('../models/FriendRequest');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const async = require('async');
@@ -110,23 +111,35 @@ exports.get_user_posts = function (req, res, next) {
 //Grabs user data and returns array of friends
 //if req.query.all===true, grab pending friend requests
 exports.get_user_friends = function (req, res, next) {
-    if (req.query.all) {
-        // Client wants all friends, even friend requests
-        User.findById(req.params.id)
-            .populate('friends', 'first_name last_name')
-            .populate('friend_requests', 'first_name last_name')
-            .exec(function (err, user) {
-                if (user===undefined) {
-                    res.status(400).json({ message: 'No user found with that id'})
-                } else if (err) {
-                    return next(err)
-                } else {
-                    res.status(200).json(user)
-                }
-            })
+    let id;
+    if(req.params.id){
+        id=req.params.id;
+    } else{
+        id=req.user.id;
+    }
+    // If user requests pending friend requests AND is the current user
+    //Then return all friends and friend requests - Only current users can
+    //view their friend requests
+    if (req.query.all && id==req.user.id) {
+        async.parallel({
+            friends: function (callback) {
+                User.findById(id).populate('friends', 'first_name last_name').exec(callback)
+            },
+            friend_requests: function (callback) {
+                FriendRequest.find({ $or:[
+                    {requestee: id},
+                    {requested: id}
+                ]})
+                .populate('requestee', 'first_name last_name')
+                .populate('requested', 'first_name last_name')
+                .exec(callback)
+            }
+        }, function (err, results) {
+            res.json({friends: results.friends.friends, friend_requests: results.friend_requests})
+        })
     } else {
         // Client only wants current friends
-        User.findById(req.params.id)
+        User.findById(id)
             .populate('friends', 'first_name last_name')
             .exec(function (err, user) {
                 if (user===undefined) {
@@ -139,22 +152,10 @@ exports.get_user_friends = function (req, res, next) {
             })
     }
 
+}
 
-    // Post.findById(req.params.postid)
-    // .populate('author', 'username')
-    // .populate('category', 'name')
-    // .exec(function (err, post) {
-    //     if (post === undefined) {
-    //         res.status(404).json({ message: 'No such post exists' })
-    //     }
-    //     else if (err) { return next(err); }
-
-    //     // Return the post to the user
-    //     else {
-    //         res.status(200).json(post)
-    //     }
-    // })
-
+exports.get_friend_requests = function (req, res, next) {
+    return res.status(200).json({ user: req.user });
 }
 
 exports.create_friend_request = function (req, res, next) {
