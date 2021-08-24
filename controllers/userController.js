@@ -135,7 +135,7 @@ exports.get_user_friends = function (req, res, next) {
                 .exec(callback)
             }
         }, function (err, results) {
-            res.json({friends: results.friends.friends, friend_requests: results.friend_requests})
+            res.status(200).json({friends: results.friends.friends, friend_requests: results.friend_requests})
         })
     } else {
         // Client only wants current friends
@@ -154,12 +154,42 @@ exports.get_user_friends = function (req, res, next) {
 
 }
 
+//Returns a list of current friend requests
 exports.get_friend_requests = function (req, res, next) {
-    return res.status(200).json({ user: req.user });
+    FriendRequest.find({ $or:[
+        {requestee: req.user.id},
+        {requested: req.user.id}
+    ]})
+    .populate('requestee', 'first_name last_name')
+    .populate('requested', 'first_name last_name')
+    .exec((err, results) => {
+        res.status(200).json({results})
+    })
 }
 
+//This method creates a new friend request
 exports.create_friend_request = function (req, res, next) {
-    return res.status(200).json({ user: req.user });
+    //First, make sure that the users are not friends
+    //Then, make sure the friend request doesn't already exist
+
+    //Current user id: req.user.id
+    //second user id: req.params.id
+
+    async.parallel({
+        friends: function (callback) {
+            User.findById(req.user.id).exec(callback)
+        },
+        friend_requests: function (callback) {
+            FriendRequest.find({ $or:[
+                {requestee: req.params.id, requested: req.user.id},
+                {requested: req.user.id, requested: req.params.id}
+            ]})
+            .exec(callback)
+        }
+    }, function (err, results) {
+        res.json(results)
+    })
+
 }
 
 exports.reject_friend_request = function (req, res, next) {

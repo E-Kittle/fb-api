@@ -17,7 +17,6 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
 
     User.findById(jwt_payload.user._id, function(err, returnedUser) {
-        console.log(returnedUser.toJSON().temp_img)
         const user = {
             id: returnedUser._id,
             first_name: returnedUser.first_name,

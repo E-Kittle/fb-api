@@ -16,21 +16,23 @@ router.get('/:id/posts', userController.get_user_posts);
 // Client can add '?all=true' if they want to view friend requests as well,
 // but the request must be for the current user. 
 router.get('/friends', passport.authenticate('jwt', { session: false }), userController.get_user_friends);
-
+// Need to check for any possible errors
 router.get('/:id/friends', passport.authenticate('jwt', { session: false }), userController.get_user_friends);
 
 
 // Grabs friend requests
-router.get('/friendreq', userController.get_friend_requests);
+//TESTED
+router.get('/friendreq', passport.authenticate('jwt', { session: false }), userController.get_friend_requests);
 
 //Create a new friend request
-router.post('/friendreq/:id', userController.create_friend_request);
+// NEED TO CHANGE BACK TO A POST METHOD
+router.get('/friendreq/:id', passport.authenticate('jwt', { session: false }), userController.create_friend_request);
 
 // Reject a friend request
-router.delete('/friendreq/:id', userController.reject_friend_request);
+router.delete('/friendreq/:id', passport.authenticate('jwt', { session: false }), userController.reject_friend_request);
 
 // accept a friend request
-router.put('/friendreq/:id', userController.accept_friend_request);
+router.put('/friendreq/:id', passport.authenticate('jwt', { session: false }), userController.accept_friend_request);
 
 // Delete a friend 
 router.delete('/friend/:id', userController.remove_friend);
