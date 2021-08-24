@@ -5,11 +5,9 @@ let PostSchema = new Schema(
     {
         author: {type:Schema.Types.ObjectId, ref:'User', required:true},
         content: {type:String},
-        photos: {type:String},
-        likes: {type:Number, required:true, default:0},
-        comments: [{
-            type:Schema.Types.ObjectId, ref:'User'
-        }],
+        date: {type: Date, required: true},
+        // photos: {type:String},   -Add at a later date
+        likes: {type:Number, required:true, default:0}
     }
 )
 

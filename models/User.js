@@ -8,10 +8,10 @@ let UserSchema = new Schema(
         email: {type:String, required:true, unique:true},
         password: {type:String, required:true},
         bio: {type:String},
-        profile_img: {type:String},
-        profile_banner: {type:String},
-        friend_requests: {type: Schema.Types.ObjectId, ref:'User'},
-        friends: {type:Schema.Types.ObjectId, ref:'User'}
+        // profile_img: {type:String},
+        // profile_banner: {type:String},  -Add images at later date
+        friend_requests: [{type: Schema.Types.ObjectId, ref:'User'}],
+        friends: [{type:Schema.Types.ObjectId, ref:'User'}]
     }
 )
 
