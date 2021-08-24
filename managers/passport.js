@@ -1,3 +1,5 @@
+// This middleware is ran whenever we need to authenticate a user to access a route
+
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const passport = require('passport');
