@@ -30,14 +30,5 @@ router.get('/session', passport.authenticate('jwt', { session: false }), userCon
 
 router.post('/session', userController.login_user);
 
-router.post('/user', userController.signup_user);
-
-router.get('/user/posts', userController.get_user_posts);
-
-router.get('/user/:id/posts', userController.get_user_posts);
-
-router.get('/user/friends', userController.get_user_friends);
-
-router.get('/user/:id/friends', userController.get_user_friends);
 
 module.exports = router;

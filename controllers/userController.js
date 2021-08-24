@@ -21,9 +21,9 @@ exports.signup_user = [
     (req, res, next) => {
         const errors = validationResult(req);
 
-        if(!errors.isEmpty()) {
+        if (!errors.isEmpty()) {
             // There were errors during validation, return 
-            res.status(400).json({errArr:errors.array()});
+            res.status(400).json({ errArr: errors.array() });
         } else {
             // There were no users, save the user
             bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
@@ -37,11 +37,13 @@ exports.signup_user = [
                 let user = new User(userDetail);
                 user.save((err, result) => {
                     if (err === null) {
-                        res.status(200).json({ 'Message': 'user Created', user:{
-                            first_name: req.body.first_name,
-                            last_name: req.body.last_name,
-                            email: req.body.email,
-                        } })
+                        res.status(200).json({
+                            'Message': 'user Created', user: {
+                                first_name: req.body.first_name,
+                                last_name: req.body.last_name,
+                                email: req.body.email,
+                            }
+                        })
                     }
                     else if (err.keyValue.email) {
                         res.status(400).json({ message: "User already exists" })
@@ -55,12 +57,12 @@ exports.signup_user = [
 exports.login_user = function (req, res, next) {
     // email, rather than username is used for authentication
     // Destructure email and password
-    let {email, password} = req.body;
+    let { email, password } = req.body;
 
     //Check if user exists in the database
     User.findOne({ email })
         .then(user => {
-            if(!user) {
+            if (!user) {
                 //User doesn't exist, return error message
                 return res.status(400).json({ message: 'Incorrect email' });
             } else {
@@ -97,15 +99,77 @@ exports.login_user = function (req, res, next) {
         })
 }
 
-exports.get_user_friends = function (req, res, next) {
-    //Grabs user data and returns array of friends
-    //if req.params.id exists, grab list of accepted friends for user
-    //if it doesn't exist, grab list of friends of user
-    //if req.query.all===true, grab pending friend requests
-}
 
 exports.get_user_posts = function (req, res, next) {
     //Returns users posts for the profile
     //if req.params.id is present, then we're grabbing it for a user profile
     // if it's not present, then we're grabbing it for ourselves
+}
+
+
+//Grabs user data and returns array of friends
+//if req.query.all===true, grab pending friend requests
+exports.get_user_friends = function (req, res, next) {
+    if (req.query.all) {
+        // Client wants all friends, even friend requests
+        User.findById(req.params.id)
+            .populate('friends', 'first_name last_name')
+            .populate('friend_requests', 'first_name last_name')
+            .exec(function (err, user) {
+                if (user===undefined) {
+                    res.status(400).json({ message: 'No user found with that id'})
+                } else if (err) {
+                    return next(err)
+                } else {
+                    res.status(200).json(user)
+                }
+            })
+    } else {
+        // Client only wants current friends
+        User.findById(req.params.id)
+            .populate('friends', 'first_name last_name')
+            .exec(function (err, user) {
+                if (user===undefined) {
+                    res.status(400).json({ message: 'No user found with that id'})
+                } else if (err) {
+                    return next(err)
+                } else {
+                    res.status(200).json(user)
+                }
+            })
+    }
+
+
+    // Post.findById(req.params.postid)
+    // .populate('author', 'username')
+    // .populate('category', 'name')
+    // .exec(function (err, post) {
+    //     if (post === undefined) {
+    //         res.status(404).json({ message: 'No such post exists' })
+    //     }
+    //     else if (err) { return next(err); }
+
+    //     // Return the post to the user
+    //     else {
+    //         res.status(200).json(post)
+    //     }
+    // })
+
+}
+
+exports.create_friend_request = function (req, res, next) {
+    return res.status(200).json({ user: req.user });
+}
+
+exports.reject_friend_request = function (req, res, next) {
+    return res.status(200).json({ user: req.user });
+}
+
+exports.accept_friend_request = function (req, res, next) {
+    return res.status(200).json({ user: req.user });
+}
+
+// Delete an existing friend
+exports.remove_friend = function (req, res, next) {
+    return res.status(200).json({ user: req.user });
 }

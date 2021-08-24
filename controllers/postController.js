@@ -1,4 +1,10 @@
+const Post = require('../models/Post');
+
+
+
+
 exports.get_posts = function(req, res, next) {
+    res.status(200).json({ message:'Would return all posts'})
     // This retrieves the posts for the users newsfeed. It returns a variety of posts
     // from the users friends. Requires authentication so when authenticated, grab the users data
     // use it to find the users friends, then pull posts from with friends id
