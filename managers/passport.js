@@ -15,14 +15,16 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 
 // Create the new JwtStrategy to check if the user has an active token for the db
 passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-    User.findById(jwt_payload.user._id, function(err, returnedUser) {
 
+    console.log('here')
+    User.findById(jwt_payload.user._id, function(err, returnedUser) {
+        console.log(returnedUser.toJSON().temp_img)
         const user = {
             id: returnedUser._id,
             first_name: returnedUser.first_name,
             last_name: returnedUser.last_name,
             email: returnedUser.email,
-            temp_img: returnedUser.temp_img
+            // temp_img: returnedUser.temp_img
         }
 
         // If there is an error, return the error

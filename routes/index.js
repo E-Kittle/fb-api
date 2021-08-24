@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const passport = require('passport');
 const userController = require('../controllers/userController');
 const postController = require('../controllers/postController');
 const commentController = require('../controllers/commentController');
@@ -25,7 +26,7 @@ router.post('/post/:id/comment/:commentid', commentController.create_comment);
 router.get('/post/:id/comments', commentController.get_comments);
 
 // Routes for user
-router.get('/session', userController.auth_user);
+router.get('/session', passport.authenticate('jwt', { session: false }), userController.auth_user);
 
 router.post('/session', userController.login_user);
 

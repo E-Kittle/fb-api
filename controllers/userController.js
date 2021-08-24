@@ -6,9 +6,9 @@ const { body, validationResult } = require('express-validator');
 
 require('dotenv').config();
 
-
+// Used to authenticate the token when user is returning to site
 exports.auth_user = function (req, res, next) {
-
+    return res.status(200).json({ user: req.user });
 }
 
 exports.signup_user = [
@@ -43,7 +43,7 @@ exports.signup_user = [
                             email: req.body.email,
                         } })
                     }
-                    else if (err.keyValue.username) {
+                    else if (err.keyValue.email) {
                         res.status(400).json({ message: "User already exists" })
                     } else if (err) { return next(err); }
                 })
