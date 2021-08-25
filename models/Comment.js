@@ -9,7 +9,6 @@ let CommentSchema = new Schema(
         content: {type: String, required: true, maxLength: 300},
         date: {type: Date, required: true},
         likes: {type: Number, default: 0},
-        postRef: {type: Schema.Types.ObjectId, ref: 'Post', default:null},
         commentRef: {type: Schema.Types.ObjectId, ref: 'Comment', default: null}
     }
 )

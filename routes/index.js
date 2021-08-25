@@ -10,20 +10,20 @@ const commentController = require('../controllers/commentController');
 // Routes for posts
 
 // Grabs posts by users friends
-router.get('/posts', postController.get_posts);
+router.get('/posts', passport.authenticate('jwt', { session: false }), postController.get_posts);
 
-router.post('/posts', postController.create_post);
+router.post('/posts', passport.authenticate('jwt', { session: false }), postController.create_post);
 
-router.put('/post/:id', postController.edit_post);
+router.put('/post/:id', passport.authenticate('jwt', { session: false }), postController.edit_post);
 
-router.delete('/post/:id', postController.delete_post);
+router.delete('/post/:id', passport.authenticate('jwt', { session: false }), postController.delete_post);
 
 // Routes for comments
-router.post('/post/:id/comment', commentController.create_comment);
+router.post('/post/:id/comment', passport.authenticate('jwt', { session: false }), commentController.create_comment);
 
-router.post('/post/:id/comment/:commentid', commentController.create_comment);
+router.post('/post/:id/comment/:commentid', passport.authenticate('jwt', { session: false }), commentController.create_comment);
 
-router.get('/post/:id/comments', commentController.get_comments);
+router.get('/post/:id/comments', passport.authenticate('jwt', { session: false }), commentController.get_comments);
 
 // Routes for user
 router.get('/session', passport.authenticate('jwt', { session: false }), userController.auth_user);

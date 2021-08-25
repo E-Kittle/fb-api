@@ -2,12 +2,14 @@ var express = require('express');
 var router = express.Router();
 const passport = require('passport');
 const userController = require('../controllers/userController')
+const postController = require('../controllers/postController')
 
 // Signup new user
 router.post('/', userController.signup_user);
 
-//Get all posts for a user
-router.get('/:id/posts', userController.get_user_posts);
+// Returns posts and comments for a specific user
+//TESTED
+router.get('/:id/posts', postController.get_user_posts);
 // This is still for debate since I'm concerned about the comment schema
 
 
@@ -33,7 +35,7 @@ router.post('/friend/:id', passport.authenticate('jwt', { session: false }), use
 router.delete('/friend/:id', passport.authenticate('jwt', { session: false }), userController.remove_friend);
 
 // Reject a friend request
-//TESTED - Should change to use the reqid though....
+//TESTED 
 router.delete('/friendreq/:reqid', passport.authenticate('jwt', { session: false }), userController.reject_friend_request);
 
 // accept a friend request

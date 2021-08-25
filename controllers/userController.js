@@ -218,7 +218,6 @@ exports.create_friend_request = function (req, res, next) {
                     ({ requestee: req.user.id, requested: req.params.id })
                     .save((err, request) => {
                         if (err) {
-                            console.log('error')
                             return next(err)
                         } else {
                             res.status(200).json({ message: 'New Request Created' })
@@ -228,7 +227,6 @@ exports.create_friend_request = function (req, res, next) {
             }
         } else if (err) {
             // Catch any errors
-            console.log('error')
             return next(err)
         }
     })
@@ -259,8 +257,6 @@ exports.reject_friend_request = function (req, res, next) {
 exports.accept_friend_request = function (req, res, next) {
     FriendRequest.findById(req.params.reqid)
         .exec((err, results) => {
-            console.log('following first query')
-            console.log(results)
             if (results === undefined || results === null) {
                 // No such request
                 res.status(400).json({ message: "No request found with that id" })
@@ -362,6 +358,3 @@ exports.remove_friend = function (req, res, next) {
         }
     )
 }
-/*
-Test involves removing Patrick and Jack as friends
-*/
