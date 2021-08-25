@@ -262,8 +262,68 @@ exports.reject_friend_request = function (req, res, next) {
     })
 }
 
+// Client sends in friend_request id. Grab the user ids (making sure the requested user has sent request),
+// and push each users id to the friends list. Then, we delete the friend_request
 exports.accept_friend_request = function (req, res, next) {
-    return res.status(200).json({ user: req.user });
+    FriendRequest.findById(req.params.reqid)
+    .exec((err, results) => {
+        console.log('following first query')
+        console.log(results)
+        if (results === undefined || results === null) {
+            // No such request
+            res.status(400).json({message: "No request found with that id"})
+        } else if (results) {
+
+            if (req.user.id.toString() === results.requested.toString()) {
+                // Success - Delete the friend_request and push the friend to the users friend array
+
+                async.parallel({
+                    requested: function(callback) {
+                        User.findById(results.requested, callback)
+                    },
+                    requestee: function(callback) {
+                        User.findById(results.requestee, callback)
+                    }
+                },
+                    function(err, asyncResults) {
+
+                        // Update each users data
+                        let user1 = asyncResults.requested;
+                        user1.friends.push(results.requestee)
+                        let user2 = asyncResults.requestee;
+                        user2.friends.push(results.requested)
+
+                        // Update the users data in the db and delete the friend request
+                        User.findByIdAndUpdate(results.requested, user1, {}, function(err) {
+                            if (err) { return next(err) }
+                            else {
+                                User.findByIdAndUpdate(results.requestee, user2, {}, function(err) {
+                                    if (err) { return next(err) }
+                                    else {
+                                        FriendRequest.findByIdAndDelete(req.params.reqid, (err) => {
+                                            if (err) { return next(err)}
+                                            else {
+                                                res.status(200).json({message: 'request deleted and users updated'})
+                                            }
+                                        })
+                                    }
+                                })
+                            }
+                        })
+
+                    }
+                )
+            } else {
+                // Only the requested user can approve a friend request - The requestee cannot approve it
+                res.status(400).json({message:"The other user must approve this request"})
+            }
+
+        } else {
+            // Error handling
+            return next(err);
+        }
+
+    })
 }
 
 // Delete an existing friend
