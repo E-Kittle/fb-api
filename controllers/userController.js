@@ -112,38 +112,40 @@ exports.get_user_posts = function (req, res, next) {
 //if req.query.all===true, grab pending friend requests
 exports.get_user_friends = function (req, res, next) {
     let id;
-    if(req.params.id){
-        id=req.params.id;
-    } else{
-        id=req.user.id;
+    if (req.params.id) {
+        id = req.params.id;
+    } else {
+        id = req.user.id;
     }
     // If user requests pending friend requests AND is the current user
     //Then return all friends and friend requests - Only current users can
     //view their friend requests
-    if (req.query.all && id==req.user.id) {
+    if (req.query.all && id == req.user.id) {
         async.parallel({
             friends: function (callback) {
                 User.findById(id).populate('friends', 'first_name last_name').exec(callback)
             },
             friend_requests: function (callback) {
-                FriendRequest.find({ $or:[
-                    {requestee: id},
-                    {requested: id}
-                ]})
-                .populate('requestee', 'first_name last_name')
-                .populate('requested', 'first_name last_name')
-                .exec(callback)
+                FriendRequest.find({
+                    $or: [
+                        { requestee: id },
+                        { requested: id }
+                    ]
+                })
+                    .populate('requestee', 'first_name last_name')
+                    .populate('requested', 'first_name last_name')
+                    .exec(callback)
             }
         }, function (err, results) {
-            res.status(200).json({friends: results.friends.friends, friend_requests: results.friend_requests})
+            res.status(200).json({ friends: results.friends.friends, friend_requests: results.friend_requests })
         })
     } else {
         // Client only wants current friends
         User.findById(id)
             .populate('friends', 'first_name last_name')
             .exec(function (err, user) {
-                if (user===undefined) {
-                    res.status(400).json({ message: 'No user found with that id'})
+                if (user === undefined) {
+                    res.status(400).json({ message: 'No user found with that id' })
                 } else if (err) {
                     return next(err)
                 } else {
@@ -156,44 +158,115 @@ exports.get_user_friends = function (req, res, next) {
 
 //Returns a list of current friend requests
 exports.get_friend_requests = function (req, res, next) {
-    FriendRequest.find({ $or:[
-        {requestee: req.user.id},
-        {requested: req.user.id}
-    ]})
-    .populate('requestee', 'first_name last_name')
-    .populate('requested', 'first_name last_name')
-    .exec((err, results) => {
-        res.status(200).json({results})
+    FriendRequest.find({
+        $or: [
+            { requestee: req.user.id },
+            { requested: req.user.id }
+        ]
     })
+        .populate('requestee', 'first_name last_name')
+        .populate('requested', 'first_name last_name')
+        .exec((err, results) => {
+            res.status(200).json({ results })
+        })
 }
 
 //This method creates a new friend request
 exports.create_friend_request = function (req, res, next) {
-    //First, make sure that the users are not friends
-    //Then, make sure the friend request doesn't already exist
 
-    //Current user id: req.user.id
-    //second user id: req.params.id
-
+    // First, check if user has an existing friend or existing friend_request
+    // with user they are requesting friendship with (req.params.id)
     async.parallel({
         friends: function (callback) {
             User.findById(req.user.id).exec(callback)
         },
         friend_requests: function (callback) {
-            FriendRequest.find({ $or:[
-                {requestee: req.params.id, requested: req.user.id},
-                {requested: req.user.id, requested: req.params.id}
-            ]})
-            .exec(callback)
+            FriendRequest.find({
+                $or: [
+                    { $and: [{ requestee: req.params.id }, { requested: req.user.id }] },
+                    { $and: [{ requestee: req.user.id }, { requested: req.params.id }] }
+                ]
+            })
+                .exec(callback)
         }
     }, function (err, results) {
-        res.json(results)
-    })
+        console.log('new')
+        console.log(results.friends)
+        console.log(results)
+        if (results.friends === undefined && results.friend_requests === undefined) {
+            res.status(400).json({message:'No such user exists'})
+        } else if (results) {
+            console.log(results)
 
+            // Check if the user is already a friend, set passed to false
+            // as a flag if user is existing friend
+            let passed=true;
+            if (results.friends.friends.length > 0) {
+                results.friends.friends.map(friend => {
+                    if (friend == req.params.id) {
+                        passed=false;
+                    }
+                })
+            }
+
+            if (!passed) {
+                // Triggered by above passed flag. User already has user as friend
+                // res.status(400).json({ message: "User already has this user as friend." });
+                res.status(400).json({ message: "User already has this user as friend.", results: { current_friends: results.friends.friends, friend_requests: results.friend_requests } })
+            } else if (results.friend_requests.length > 0) {
+                // User already has an existing friend request
+                // res.status(400).json({ message: "User already has pending friend request" });
+                res.status(400).json({ message: "User already has pending friend request", results: { current_friends: results.friends.friends, friend_requests: results.friend_requests } })
+            } else {
+                console.log('would be triggered to make new request')
+                // res.status(200).json({message:'New request would be created'})
+                //Everything passed, create new friend request
+                
+                let newRequest = new FriendRequest
+                    ({ requestee: req.user.id, requested: req.params.id })
+                    .save((err, request) => {
+                        if (err) {
+                            console.log('error')
+                            return next(err)
+                        } else {
+                            res.status(200).json({ message: 'New Request Created' })
+                        }
+                    })
+                    
+            }
+        } else if (err) {
+            // Catch any errors
+            console.log('error')
+            return next(err)
+        }
+    })
 }
 
+// Deletes the friend_request from the db. 
 exports.reject_friend_request = function (req, res, next) {
-    return res.status(200).json({ user: req.user });
+    // Find the id for the friend request
+    FriendRequest.find({
+        $or: [
+            { $and: [{ requestee: req.params.id }, { requested: req.user.id }] },
+            { $and: [{ requestee: req.user.id }, { requested: req.params.id }] }
+        ]
+    })
+    .exec((err, results) => {
+        // If successful, delete friend request
+        if (results) {
+            FriendRequest.findByIdAndDelete(results[0]._id, (err) => {
+                if (err) { return next(err) }
+                else {
+                    res.json({message:'Deleted request:', results})
+                }
+            })
+        } else if (results==undefined) {
+            // If no friend request found, then request doesn't exist
+            res.status(400).json({message:"Friend request doesn't exist"})
+        } else {
+            return next(err);
+        }
+    })
 }
 
 exports.accept_friend_request = function (req, res, next) {

@@ -9,3 +9,4 @@ let FriendRequestSchema = new Schema(
 )
 
 module.exports = mongoose.model('FriendRequest', FriendRequestSchema);
+

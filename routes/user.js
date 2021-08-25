@@ -25,8 +25,7 @@ router.get('/:id/friends', passport.authenticate('jwt', { session: false }), use
 router.get('/friendreq', passport.authenticate('jwt', { session: false }), userController.get_friend_requests);
 
 //Create a new friend request
-// NEED TO CHANGE BACK TO A POST METHOD
-router.get('/friendreq/:id', passport.authenticate('jwt', { session: false }), userController.create_friend_request);
+router.post('/friendreq/:id', passport.authenticate('jwt', { session: false }), userController.create_friend_request);
 
 // Reject a friend request
 router.delete('/friendreq/:id', passport.authenticate('jwt', { session: false }), userController.reject_friend_request);
