@@ -12,6 +12,10 @@ exports.create_comment = function(req, res, next) {
     // we can validate and save the comment from there
 }
 
-exports.get_comments = function(req, res, next) {
+exports.delete_comment = function(req, res, next) {
+    
+}
+
+exports.like_comment = function(req, res, next) {
     
 }
