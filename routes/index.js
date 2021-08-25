@@ -9,6 +9,7 @@ const commentController = require('../controllers/commentController');
 NEED TO DO
         // Need to figure out what to do if the user doesn't have friends?
         // Should probably create a backup API call that grabs specific users
+        Changed error handling for the below functions, may want to retest routes
 */
 
 // ROUTES FOR POSTS
@@ -22,6 +23,7 @@ router.post('/posts', passport.authenticate('jwt', { session: false }), postCont
 
 router.put('/post/:id', passport.authenticate('jwt', { session: false }), postController.edit_post);
 
+// TESTED Route to delete a post
 router.delete('/post/:id', passport.authenticate('jwt', { session: false }), postController.delete_post);
 
 // TESTED Route to add or remove a like 

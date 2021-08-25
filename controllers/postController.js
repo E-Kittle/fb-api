@@ -64,7 +64,30 @@ exports.edit_post = function (req, res, next) {
 }
 
 exports.delete_post = function (req, res, next) {
+    Post.findById(req.params.id)
+        .exec((err, results) => {
+            if (results === undefined || results === null) {
+                res.status(404).json({ message: 'Post not found' })
+                return;
+            } else if (err) {
+                return next(err)
+            }
 
+            if (results.author.toString() == req.user.id.toString()) {
+                // First, check if the user is the author - only authors can delete posts
+                // User is author, delete the post
+                Post.findByIdAndDelete(req.params.id, (err) => {
+                    if (err) { return next(err) }
+                    else {
+                        res.status(200).json({ message: 'Post deleted' })
+                    }
+                })
+            } else {
+                // User isn't author, return error message
+                res.status(500).json({ message: 'Only the author of the post can delete the comment' })
+            }
+
+        })
 }
 
 // Likes are tied to a user. They must always be counted by client...
@@ -72,9 +95,12 @@ exports.like_post = function (req, res, next) {
     // Grab the post data from the db. 
     Post.findById(req.params.id)
         .exec((err, results) => {
+
             if (results === undefined || results === null) {
-                // No post was found with that id
-                res.status(404).json({ message: 'No such post found' })
+                res.status(404).json({ message: 'Post not found' })
+                return;
+            } else if (err) {
+                return next(err)
             } else {
                 // Check if the user has already liked the post
                 let index = results.likes.findIndex(user => user.toString() == req.user.id.toString());
