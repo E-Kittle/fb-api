@@ -212,7 +212,6 @@ exports.create_friend_request = function (req, res, next) {
                 // User already has an existing friend request
                 res.status(400).json({ message: "User already has pending friend request", results: { current_friends: results.friends.friends, friend_requests: results.friend_requests } })
             } else {
-                console.log('would be triggered to make new request')
                 //Everything passed, create new friend request
 
                 let newRequest = new FriendRequest
@@ -237,29 +236,22 @@ exports.create_friend_request = function (req, res, next) {
 
 // Deletes the friend_request from the db. 
 exports.reject_friend_request = function (req, res, next) {
-    // Find the id for the friend request
-    FriendRequest.find({
-        $or: [
-            { $and: [{ requestee: req.params.id }, { requested: req.user.id }] },
-            { $and: [{ requestee: req.user.id }, { requested: req.params.id }] }
-        ]
-    })
-        .exec((err, results) => {
-            if (results == undefined || results.length === 0) {
-                // If no friend request found, then request doesn't exist
-                res.status(400).json({ message: "Friend request doesn't exist" })
-            } else if (results.length !== 0) {
-                // Successful, delete friend request
-                FriendRequest.findByIdAndDelete(results[0]._id, (err) => {
-                    if (err) { return next(err) }
-                    else {
-                        res.json({ message: 'Deleted request:', results })
-                    }
-                })
-            } else {
-                return next(err);
+
+    // Delete the friendrequest
+    FriendRequest.findByIdAndDelete(req.params.reqid, (err) => {
+        if (err) {
+            // If an error occurs, check if its due to an invalid id
+            if (err.kind = 'ObjectId') {
+                res.status(400).json({message: 'failed due to invalid id'})
+            } else{
+                return next(err) 
             }
-        })
+        }
+        else {
+            // success! Send success data
+            res.status(200).json({ message: 'Deleted request:'})
+        }
+    })
 }
 
 // Client sends in friend_request id. Grab the user ids (making sure the requested user has sent request),

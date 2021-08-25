@@ -29,11 +29,12 @@ router.get('/friendreq', passport.authenticate('jwt', { session: false }), userC
 router.post('/friend/:id', passport.authenticate('jwt', { session: false }), userController.create_friend_request);
 
 // Delete a friend 
+// TESTED
 router.delete('/friend/:id', passport.authenticate('jwt', { session: false }), userController.remove_friend);
 
 // Reject a friend request
 //TESTED - Should change to use the reqid though....
-router.delete('/friendreq/:id', passport.authenticate('jwt', { session: false }), userController.reject_friend_request);
+router.delete('/friendreq/:reqid', passport.authenticate('jwt', { session: false }), userController.reject_friend_request);
 
 // accept a friend request
 //TESTED
