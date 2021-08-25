@@ -190,14 +190,10 @@ exports.create_friend_request = function (req, res, next) {
                 .exec(callback)
         }
     }, function (err, results) {
-        console.log('new')
-        console.log(results.friends)
-        console.log(results)
         if (results.friends === undefined && results.friend_requests === undefined) {
+            // No such user exists
             res.status(400).json({message:'No such user exists'})
         } else if (results) {
-            console.log(results)
-
             // Check if the user is already a friend, set passed to false
             // as a flag if user is existing friend
             let passed=true;
@@ -211,15 +207,12 @@ exports.create_friend_request = function (req, res, next) {
 
             if (!passed) {
                 // Triggered by above passed flag. User already has user as friend
-                // res.status(400).json({ message: "User already has this user as friend." });
                 res.status(400).json({ message: "User already has this user as friend.", results: { current_friends: results.friends.friends, friend_requests: results.friend_requests } })
             } else if (results.friend_requests.length > 0) {
                 // User already has an existing friend request
-                // res.status(400).json({ message: "User already has pending friend request" });
                 res.status(400).json({ message: "User already has pending friend request", results: { current_friends: results.friends.friends, friend_requests: results.friend_requests } })
             } else {
                 console.log('would be triggered to make new request')
-                // res.status(200).json({message:'New request would be created'})
                 //Everything passed, create new friend request
                 
                 let newRequest = new FriendRequest
@@ -252,18 +245,18 @@ exports.reject_friend_request = function (req, res, next) {
         ]
     })
     .exec((err, results) => {
-        // If successful, delete friend request
-        if (results) {
+        if (results==undefined || results.length === 0) {
+            // If no friend request found, then request doesn't exist
+            res.status(400).json({message:"Friend request doesn't exist"})
+        } else if (results.length !==0 ) {
+            // Successful, delete friend request
             FriendRequest.findByIdAndDelete(results[0]._id, (err) => {
                 if (err) { return next(err) }
                 else {
                     res.json({message:'Deleted request:', results})
                 }
             })
-        } else if (results==undefined) {
-            // If no friend request found, then request doesn't exist
-            res.status(400).json({message:"Friend request doesn't exist"})
-        } else {
+          } else {
             return next(err);
         }
     })
