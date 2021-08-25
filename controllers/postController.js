@@ -1,16 +1,40 @@
 const Post = require('../models/Post');
+const User = require('../models/User');
 
 
 
-
+// Returns posts and comments for newsfeed
 exports.get_posts = function(req, res, next) {
-    res.status(200).json({ message:'Would return all posts'})
-    // if req.params.id is present, we're grabbing posts for a specific user
-    // if it is not present, we're grabbing posts for the newsfeed
-    //First, grab user friends list
-    //then, grab posts where the friends are authors and populate comments
 
-    //if grabbing post for a specific user, then just query 
+    // First, find the friends of the current user
+    User.findById(req.user.id)
+    .exec((err, results) => {
+        if(results.friends.length > 0) {
+
+            // Map through the friends to create the filter for Post
+            let filter = results.friends.map(friend => {
+                return {author: friend}
+            })
+            filter.push({author: req.user.id})  //Add current user to the array
+
+            // Filter through the posts and populate comments
+            Post.find({
+                $or: filter
+            })
+            .populate('comments')
+            .exec((err, filterResults) => {
+                res.status(200).json(filterResults)
+            })
+
+            // Error handling
+        } else if (err) {
+            return next(err)
+        } else{
+            // A user was found but they do not have any friends
+            // Allow client to determine best course
+            res.status(200).json({message: "User doesn't have friends", new:true})
+        }
+    })
 }
 
 // Grabs posts for a specific user

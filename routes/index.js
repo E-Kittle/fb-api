@@ -5,7 +5,12 @@ const userController = require('../controllers/userController');
 const postController = require('../controllers/postController');
 const commentController = require('../controllers/commentController');
 
+/*
+NEED TO DO
+        // Need to figure out what to do if the user doesn't have friends?
+        // Should probably create a backup API call that grabs specific users
 
+*/
 
 // Routes for posts
 
