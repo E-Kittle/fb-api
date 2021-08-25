@@ -72,7 +72,7 @@ exports.like_post = function (req, res, next) {
     // Grab the post data from the db. 
     Post.findById(req.params.id)
         .exec((err, results) => {
-            if (results === undefined) {
+            if (results === undefined || results === null) {
                 // No post was found with that id
                 res.status(404).json({ message: 'No such post found' })
             } else {

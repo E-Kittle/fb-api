@@ -8,7 +8,7 @@ let CommentSchema = new Schema(
         author: {type: Schema.Types.ObjectId, ref: 'User', default: null},
         content: {type: String, required: true, maxLength: 300},
         date: {type: Date, required: true},
-        likes: {type: Number, default: 0},
+        likes: [{type:Schema.Types.ObjectId, ref:'User', default: []}],
         commentRef: {type: Schema.Types.ObjectId, ref: 'Comment', default: null}
     }
 )
