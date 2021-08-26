@@ -1,4 +1,7 @@
 const Comment = require('../models/Comment');
+const { body, validationResult } = require('express-validator');
+const async = require('async');
+const Post = require('../models/Post')
 
 // Question - do we need a seperate route to grab the associated comments?
 //
@@ -9,10 +12,62 @@ Only display the first few comments on the newsfeed. Then, when user selects 'vi
 can make an api call to retrieve all associated comments
 */
 
-exports.create_comment = function (req, res, next) {
-    // Params send in the post id (or comment id) and the userid, 
-    // we can validate and save the comment from there
-}
+exports.create_comment = [
+    //Post id is saved in req.params.id
+
+    // Validate and sanitize data
+    // Content isn't necessarily required. User could just be posting an image
+    body('content', 'Content is required').isLength({ min: 1 }).escape().trim(),
+
+    (req, res, next) => {
+
+        // If there were errors, reject the submission and return the user
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            res.status(400).json({ errArr: errors.array() })
+        }
+
+        // Grab the post data, could be done after creating the comment but then we'd
+        // have to delete the comment
+        Post.findById(req.params.id, (err, post) => {
+            if (post === undefined) {
+                res.status(400).json({ message: 'No such post found. Cannot create comment' })
+            } else {
+                // Post was found. Create the comment and update the posts comment array
+                let today = new Date();
+                let date = today.toDateString();
+                // Comment may be a reply to another comment, if so, the comment id
+                // is stored in req.body. If it is not a reply, set commentRef to null
+                let ref;
+                req.body.commentid ? ref = req.body.commentid : ref = null;
+
+                newComment = new Comment({
+                    author: req.user.id,
+                    content: req.body.content,
+                    date: date,
+                    likes: [],
+                    commentRef: ref
+                })
+                    .save((err, result) => {
+                        if (err) { return next(err) }
+                        else {
+                            // Update the post and push to db
+                            let updatedPost = post;
+                            post.comments.push(result._id);
+                            Post.findByIdAndUpdate(req.params.id, updatedPost, {}, (err) => {
+                                if (err) { return next(err) }
+                                else {
+                                    res.status(200).json({ message: 'new comment created' })
+                                }
+                            })
+                        }
+                    })
+            }
+        })
+
+    }
+]
+
 
 // Deletes a comment
 exports.delete_comment = function (req, res, next) {

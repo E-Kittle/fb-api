@@ -18,7 +18,7 @@ NEED TO DO
 // TESTED - Grabs posts by users friends
 router.get('/posts', passport.authenticate('jwt', { session: false }), postController.get_posts);
 
-// Creates a new post
+// TESTED - Creates a new post
 router.post('/posts', passport.authenticate('jwt', { session: false }), postController.create_post);
 
 router.put('/post/:id', passport.authenticate('jwt', { session: false }), postController.edit_post);
@@ -38,7 +38,8 @@ router.post('/post/:id/comment', passport.authenticate('jwt', { session: false }
 //TESTED Route to add or remove a like from a comment - req.body will have increment
 router.put('/comment/:id', passport.authenticate('jwt', { session: false }), commentController.like_comment);
 
-//TESTED Route to delete a comment
+//TESTED Route to delete a comment - Need to fix! also needs to remove from associated post... shit. 
+// route needs to be: /posts/:id/comment/:commentid - To give us the associated post data
 router.delete('/comment/:id', passport.authenticate('jwt', { session: false }), commentController.delete_comment);
 
 

@@ -1,5 +1,7 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
+const async = require('async');
+const { body, validationResult } = require('express-validator');
 
 
 
@@ -53,11 +55,40 @@ exports.get_user_posts = function (req, res, next) {
         })
 }
 
+// Creates a new post 
+exports.create_post = [
 
-exports.create_post = function (req, res, next) {
-    // This creates a new post. Requires authentication, so grab user from authentication,
-    // and grab content from params to create a new post
-}
+    // Validate and sanitize data
+    body('content', 'Content is required').escape().trim(),
+
+    (req, res, next) => {
+
+        // If there were errors, reject the submission and return the user
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            res.status(400).json({ errArr: errors.array() })
+        }
+
+        // There were no errors, so create the new post
+        let today = new Date();
+        let date = today.toDateString();
+
+        newPost = new Post({
+            author: req.user.id,        //Only current users can make posts
+            content: req.body.content,  //Set in with body
+            date: date,
+            likes: [],                  //Comments and likes are updated later
+            comments: [],
+        })
+            .save((err, result) => {
+                if (err) { return next(err) }
+                else {
+                    res.status(200).json({ message: 'new post created' })
+                }
+            })
+
+    }
+]
 
 exports.edit_post = function (req, res, next) {
     // requires authentication - Must be author
