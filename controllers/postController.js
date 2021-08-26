@@ -90,9 +90,42 @@ exports.create_post = [
     }
 ]
 
-exports.edit_post = function (req, res, next) {
-    // requires authentication - Must be author
-}
+exports.edit_post =
+    [
+        // Validate and sanitize data
+        body('content', 'Content is required').escape().trim(),
+
+
+        function (req, res, next) {
+
+            // If there were errors, reject the submission and return the user
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                res.status(400).json({ errArr: errors.array() })
+            }
+
+            // requires authentication - Must be author
+            Post.findById(req.params.id, (err, result) => {
+                // post error handling
+                if (result == undefined) {
+                    res.status(400).json({ message: 'No such post found' })
+                } else {
+                    // Post was found, update and save
+                    let newPost = result;
+                    newPost.content = req.body.content;
+                    Post.findByIdAndUpdate(req.params.id, newPost, {}, (err) => {
+                        if (err) { return next(err) }
+                        else {
+                            res.status(200).json({ message: 'Post successfully updated' })
+                        }
+                    })
+                }
+            })
+        }
+    ]
+
+
+
 
 exports.delete_post = function (req, res, next) {
     Post.findById(req.params.id)

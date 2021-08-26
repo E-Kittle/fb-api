@@ -21,6 +21,7 @@ router.get('/posts', passport.authenticate('jwt', { session: false }), postContr
 // TESTED - Creates a new post
 router.post('/posts', passport.authenticate('jwt', { session: false }), postController.create_post);
 
+// TESTED Route to edit a post
 router.put('/post/:id', passport.authenticate('jwt', { session: false }), postController.edit_post);
 
 // TESTED Route to delete a post
@@ -32,11 +33,14 @@ router.put('/posts/:id/:like', passport.authenticate('jwt', { session: false }),
 
 // ROUTES FOR COMMENTS
 //----------------------------------------------------------------------------
-//Route to create a comment - if req.body has a commentid, then this comment is referencing another comment
+//TESTED Route to create a comment - if req.body has a commentid, then this comment is referencing another comment
 router.post('/post/:id/comment', passport.authenticate('jwt', { session: false }), commentController.create_comment);
 
+//Route to edit a comment
+router.put('/comment/:id', passport.authenticate('jwt', { session: false }), commentController.edit_comment);
+
 //TESTED Route to add or remove a like from a comment - req.body will have increment
-router.put('/comment/:id', passport.authenticate('jwt', { session: false }), commentController.like_comment);
+router.put('/comment/:id/like', passport.authenticate('jwt', { session: false }), commentController.like_comment);
 
 //TESTED Route to delete a comment - Need to fix! also needs to remove from associated post... shit. 
 // route needs to be: /posts/:id/comment/:commentid - To give us the associated post data

@@ -69,6 +69,41 @@ exports.create_comment = [
 ]
 
 
+exports.edit_comment =
+    [
+        // Validate and sanitize data
+        body('content', 'Content is required').escape().trim(),
+
+
+        function (req, res, next) {
+
+            // If there were errors, reject the submission and return the user
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                res.status(400).json({ errArr: errors.array() })
+            }
+
+            // requires authentication - Must be author
+            Comment.findById(req.params.id, (err, result) => {
+                // post error handling
+                if (result == undefined) {
+                    res.status(400).json({ message: 'No such comment found' })
+                } else {
+                    // Post was found, update and save
+                    let newComment = result;
+                    newComment.content = req.body.content;
+                    Comment.findByIdAndUpdate(req.params.id, newComment, {}, (err) => {
+                        if (err) { return next(err) }
+                        else {
+                            res.status(200).json({ message: 'Comment successfully updated' })
+                        }
+                    })
+                }
+            })
+        }
+    ]
+
+
 // Deletes a comment
 exports.delete_comment = function (req, res, next) {
     Comment.findById(req.params.id)
