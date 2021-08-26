@@ -106,6 +106,49 @@ exports.edit_comment =
 
 // Deletes a comment
 exports.delete_comment = function (req, res, next) {
+    async.parallel({
+        post: function(callback) {
+            Post.findById(req.params.id, callback)
+        },
+        comment: function(callback) {
+            Comment.findById(req.params.commentid, callback)
+        }
+    }, function (err, results) {
+        console.log(results)
+        if (results.comment === undefined || results.post === undefined) {
+            res.status(400).json({message: "Invalid post or comment id"})
+        } else {
+
+            if (results.post.author.toString() == req.user.id.toString()) {
+                // First, check if the user is the author - only authors can delete comments
+
+                // Update post
+                let updatedPost = results.post;
+                let index = updatedPost.comments.findIndex(comment => comment.toString() === req.params.commentid);
+                updatedPost.comments.splice(index, 1);
+
+                Post.findByIdAndUpdate(req.params.id, updatedPost, {}, (err) => {
+                    if (err) { return next(err)}
+                    else {
+                        Comment.findByIdAndDelete(req.params.id, (err) => {
+                            if (err) { return next(err) }
+                            else {
+                                res.status(200).json({ message: 'Comment deleted' })
+                            }
+                        })
+                    }
+                })
+            } else {
+                // User isn't author, return error message
+                res.status(500).json({ message: 'Only the author of the comment can delete the comment' })
+            }
+        }
+        
+        
+    })
+}
+
+/*
     Comment.findById(req.params.id)
         .exec((err, results) => {
 
@@ -131,6 +174,7 @@ exports.delete_comment = function (req, res, next) {
             }
         })
 }
+*/
 
 exports.like_comment = function (req, res, next) {
     Comment.findById(req.params.id)
