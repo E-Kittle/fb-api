@@ -10,9 +10,12 @@ router.post('/', userController.signup_user);
 // Returns posts and comments for a specific user
 //TESTED
 router.get('/:id/posts', postController.get_user_posts);
-// This is still for debate since I'm concerned about the comment schema
 
 
+
+
+// ROUTES FOR MANAGING FRIENDS
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // These two routes grab friend lists. 
 // Client can add '?all=true' if they want to view friend requests as well,

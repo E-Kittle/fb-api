@@ -3,14 +3,6 @@ const { body, validationResult } = require('express-validator');
 const async = require('async');
 const Post = require('../models/Post')
 
-// Question - do we need a seperate route to grab the associated comments?
-//
-
-
-/*
-Only display the first few comments on the newsfeed. Then, when user selects 'view more comments', the client
-can make an api call to retrieve all associated comments
-*/
 
 exports.create_comment = [
     //Post id is saved in req.params.id
@@ -68,7 +60,7 @@ exports.create_comment = [
     }
 ]
 
-
+// Edits a comment
 exports.edit_comment =
     [
         // Validate and sanitize data
@@ -106,6 +98,9 @@ exports.edit_comment =
 
 // Deletes a comment
 exports.delete_comment = function (req, res, next) {
+    // Grab both the post data and comment data
+    // The post will be updated to remove the comment from the post.comments array
+    // the comment data will be used to ensure that only the author can delete the comment
     async.parallel({
         post: function(callback) {
             Post.findById(req.params.id, callback)
@@ -114,12 +109,13 @@ exports.delete_comment = function (req, res, next) {
             Comment.findById(req.params.commentid, callback)
         }
     }, function (err, results) {
-        console.log(results)
+        
+        // Error handling
         if (results.comment === undefined || results.post === undefined) {
             res.status(400).json({message: "Invalid post or comment id"})
         } else {
 
-            if (results.post.author.toString() == req.user.id.toString()) {
+            if (results.comment.author.toString() == req.user.id.toString()) {
                 // First, check if the user is the author - only authors can delete comments
 
                 // Update post
@@ -130,6 +126,7 @@ exports.delete_comment = function (req, res, next) {
                 Post.findByIdAndUpdate(req.params.id, updatedPost, {}, (err) => {
                     if (err) { return next(err)}
                     else {
+                        // Delete comment
                         Comment.findByIdAndDelete(req.params.id, (err) => {
                             if (err) { return next(err) }
                             else {
@@ -148,34 +145,7 @@ exports.delete_comment = function (req, res, next) {
     })
 }
 
-/*
-    Comment.findById(req.params.id)
-        .exec((err, results) => {
-
-            if (results === undefined || results === null) {
-                res.status(404).json({ message: 'Comment not found' })
-                return;
-            } else if (err) {
-                return next(err)
-            }
-
-            if (results.author.toString() == req.user.id.toString()) {
-                // First, check if the user is the author - only authors can delete comments
-                // User is author, delete the comment
-                Comment.findByIdAndDelete(req.params.id, (err) => {
-                    if (err) { return next(err) }
-                    else {
-                        res.status(200).json({ message: 'Comment deleted' })
-                    }
-                })
-            } else {
-                // User isn't author, return error message
-                res.status(500).json({ message: 'Only the author of the comment can delete the comment' })
-            }
-        })
-}
-*/
-
+// Adds or removes a like from a comment, essentially a toggle functionality
 exports.like_comment = function (req, res, next) {
     Comment.findById(req.params.id)
         .exec((err, results) => {

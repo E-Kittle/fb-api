@@ -1,6 +1,5 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
-const async = require('async');
 const { body, validationResult } = require('express-validator');
 
 
@@ -90,6 +89,7 @@ exports.create_post = [
     }
 ]
 
+// Edits a post
 exports.edit_post =
     [
         // Validate and sanitize data
@@ -125,9 +125,9 @@ exports.edit_post =
     ]
 
 
-
-
+// Delets a post
 exports.delete_post = function (req, res, next) {
+    // Grab post data, necessary to ensure that it is the author deleting the post
     Post.findById(req.params.id)
         .exec((err, results) => {
             if (results === undefined || results === null) {
@@ -154,7 +154,7 @@ exports.delete_post = function (req, res, next) {
         })
 }
 
-// Likes are tied to a user. They must always be counted by client...
+// Likes are tied to a user. This has toggle functionality to add the users id to the post.likes array
 exports.like_post = function (req, res, next) {
     // Grab the post data from the db. 
     Post.findById(req.params.id)

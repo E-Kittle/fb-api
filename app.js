@@ -65,3 +65,10 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+/*
+Things to add
+-Ability for users to upload and use images
+-Add a way for the user to grab demo data if they do not have friends- used for main newsfeed
+
+*/

@@ -26,7 +26,7 @@ exports.signup_user = [
             // There were errors during validation, return 
             res.status(400).json({ errArr: errors.array() });
         } else {
-            // There were no users, save the user
+            // There were no users, has the password and save the user
             bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
                 let userDetail = {
                     first_name: req.body.first_name,

@@ -5,12 +5,6 @@ const userController = require('../controllers/userController');
 const postController = require('../controllers/postController');
 const commentController = require('../controllers/commentController');
 
-/*
-NEED TO DO
-        // Need to figure out what to do if the user doesn't have friends?
-        // Should probably create a backup API call that grabs specific users
-        Changed error handling for the below functions, may want to retest routes
-*/
 
 // ROUTES FOR POSTS
 // ----------------------------------------------------------------------------
@@ -42,15 +36,16 @@ router.put('/comment/:id', passport.authenticate('jwt', { session: false }), com
 //TESTED Route to add or remove a like from a comment - req.body will have increment
 router.put('/comment/:id/like', passport.authenticate('jwt', { session: false }), commentController.like_comment);
 
-//TESTED Route to delete a comment - Need to fix! also needs to remove from associated post... shit. 
-// route needs to be: /posts/:id/comment/:commentid - To give us the associated post data
+//TESTED Route to delete a comment 
 router.delete('/post/:id/comment/:commentid', passport.authenticate('jwt', { session: false }), commentController.delete_comment);
 
 
 // Routes for user
 //----------------------------------------------------------------------------
+// Route authenticates user upon returning to site
 router.get('/session', passport.authenticate('jwt', { session: false }), userController.auth_user);
 
+// Route to login user
 router.post('/session', userController.login_user);
 
 
