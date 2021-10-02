@@ -59,10 +59,11 @@ exports.get_user_posts = function (req, res, next) {
 exports.create_post = [
 
     // Validate and sanitize data
-    body('content', 'Content is required').escape().trim(),
+    body('content', 'Content is required').escape().isLength({ min: 1 }).trim(),
 
     (req, res, next) => {
-
+        console.log(req.body.content)
+        console.log('not working?')
         // If there were errors, reject the submission and return the user
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
