@@ -47,7 +47,7 @@ exports.signup_user = [
                         })
                     }
                     else if (err.keyValue.email) {
-                        res.status(400).json({ message: "User already exists" })
+                        res.status(400).json({ message: "User with that email already exists" })
                     } else if (err) { return next(err); }
                 })
             })

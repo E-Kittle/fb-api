@@ -23,6 +23,7 @@ exports.get_posts = function (req, res, next) {
                     $or: filter
                 })
                     .populate('comments')
+                    .populate('author')
                     .exec((err, filterResults) => {
                         res.status(200).json(filterResults)
                     })
