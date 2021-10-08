@@ -397,8 +397,8 @@ exports.find_user = function (req, res, next)  {
     if (search.length === 1) {
         User.find({
             $or: [
-                {'first_name': { "$regex": search[0], "$options":'i'}},
-                {'last_name': { "$regex": search[0], "$options":'i'}}
+                {'first_name': { "$regex": `^${search[0]}`, "$options":'i'}},
+                {'last_name': { "$regex": `^${search[0]}`, "$options":'i'}}
             ]
         })
         .exec((err, results) => {
@@ -420,7 +420,7 @@ exports.find_user = function (req, res, next)  {
     } else {
         // client has submitted their search in 'first last' format, run search accordingly
         User.find(
-                {'first_name': { "$regex": search[0], "$options":'i'}, 'last_name': { "$regex": search[1], "$options":'i'}}
+                {'first_name': { "$regex": `^${search[0]}`, "$options":'i'}, 'last_name': { "$regex": `^${search[1]}`, "$options":'i'}}
         )
         .exec((err, results) => {
             if (err) {
