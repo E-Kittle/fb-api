@@ -13,6 +13,8 @@ router.get('/profile/:id/feed', postController.get_user_posts);
 // Returns the users profile data and friends
 router.get('/profile/:id', passport.authenticate('jwt', {session: false}), userController.get_profile);
 
+// Searches for an existing user
+router.get('/:id', passport.authenticate('jwt', { session: false }), userController.find_user);
 
 // ROUTES FOR MANAGING FRIENDS
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------

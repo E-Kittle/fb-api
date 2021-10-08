@@ -386,3 +386,56 @@ exports.get_profile = function (req, res, next) {
 
     })
 }
+
+
+
+// Function to find a user in the database
+exports.find_user = function (req, res, next)  {
+    const search = req.params.id.split('+')
+    let theResults = [];
+
+    if (search.length === 1) {
+        User.find({
+            $or: [
+                {'first_name': { "$regex": search[0], "$options":'i'}},
+                {'last_name': { "$regex": search[0], "$options":'i'}}
+            ]
+        })
+        .exec((err, results) => {
+            if (err) {
+                return next(err);
+            } else {
+                results.map(person => {
+                    let newPerson = {
+                        'first_name': person.first_name,
+                        'last_name': person.last_name,
+                        '_id': person._id
+                    }
+                    theResults.push(newPerson)
+                })
+                res.status(200).json({message: 'worked', search: theResults})
+            }
+        })
+        
+    } else {
+        // client has submitted their search in 'first last' format, run search accordingly
+        User.find(
+                {'first_name': { "$regex": search[0], "$options":'i'}, 'last_name': { "$regex": search[1], "$options":'i'}}
+        )
+        .exec((err, results) => {
+            if (err) {
+                return next(err);
+            } else {
+                results.map(person => {
+                    let newPerson = {
+                        'first_name': person.first_name,
+                        'last_name': person.last_name,
+                        '_id': person._id
+                    }
+                    theResults.push(newPerson)
+                })
+                res.status(200).json({message: 'worked', search: theResults})
+            }
+        })
+    } 
+}
