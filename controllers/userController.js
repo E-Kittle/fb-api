@@ -350,3 +350,39 @@ exports.remove_friend = function (req, res, next) {
         }
     )
 }
+
+// Delete an existing friend
+exports.get_profile = function (req, res, next) {
+    User.findById(req.params.id)
+    .populate('friends') 
+    .exec((err, results) => {
+        if (results === undefined || results === null) {
+            // No such request
+            res.status(400).json({ message: "No request found with that id" })
+        } else if (results) {
+            let user = {
+                _id: results._id,
+                first_name: results.first_name,
+                last_name: results.last_name,
+                email: results.email,
+                bio: results.bio
+            }
+
+            let friendList = [];
+            results.friends.map(friend => {
+                let person= {
+                    _id: friend._id,
+                    first_name: friend.first_name,
+                    last_name: friend.last_name
+                }
+                friendList.push(person)
+            })
+
+            res.status(200).json({user:user, friends:friendList})
+        } else {
+            // Error handling
+            return next(err);
+        }
+
+    })
+}
