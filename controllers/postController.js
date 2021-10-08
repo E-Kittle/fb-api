@@ -158,6 +158,9 @@ exports.delete_post = function (req, res, next) {
 
 // Likes are tied to a user. This has toggle functionality to add the users id to the post.likes array
 exports.like_post = function (req, res, next) {
+    console.log('triggered')
+    console.log(req.params.id)
+    console.log(req.user)
     // Grab the post data from the db. 
     Post.findById(req.params.id)
         .exec((err, results) => {

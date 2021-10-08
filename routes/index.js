@@ -22,7 +22,7 @@ router.put('/post/:id', passport.authenticate('jwt', { session: false }), postCo
 router.delete('/post/:id', passport.authenticate('jwt', { session: false }), postController.delete_post);
 
 // TESTED Route to add or remove a like 
-router.put('/posts/:id/:like', passport.authenticate('jwt', { session: false }), postController.like_post)
+router.put('/post/:id/like', passport.authenticate('jwt', { session: false }), postController.like_post);
 
 
 // ROUTES FOR COMMENTS
