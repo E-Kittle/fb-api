@@ -22,8 +22,16 @@ exports.get_posts = function (req, res, next) {
                 Post.find({
                     $or: filter
                 })
-                    .populate('comments')
-                    .populate('author')
+                    // .populate('comments')
+                    .populate({
+                        path: 'comments',
+                        populate: {
+                            path: 'author',
+                            model: 'User',
+                            select: 'first_name last_name'
+                        }
+                    })
+                    .populate('author', 'first_name last_name')
                     .exec((err, filterResults) => {
                         res.status(200).json(filterResults)
                     })
@@ -158,11 +166,9 @@ exports.delete_post = function (req, res, next) {
 
 // Likes are tied to a user. This has toggle functionality to add the users id to the post.likes array
 exports.like_post = function (req, res, next) {
-    console.log('triggered')
-    console.log(req.params.id)
-    console.log(req.user)
     // Grab the post data from the db. 
     Post.findById(req.params.id)
+    .populate('author', 'first_name last_name')
         .exec((err, results) => {
 
             if (results === undefined || results === null) {
