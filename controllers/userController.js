@@ -62,6 +62,7 @@ exports.login_user = function (req, res, next) {
 
     //Check if user exists in the database
     User.findOne({ email })
+        .populate('friends', 'first_name last_name')
         .then(user => {
             if (!user) {
                 //User doesn't exist, return error message
