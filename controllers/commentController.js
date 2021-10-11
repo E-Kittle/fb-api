@@ -169,7 +169,9 @@ exports.like_comment = function (req, res, next) {
                 }
 
                 // Update the post in the db
-                Comment.findByIdAndUpdate(req.params.id, newComment, {}, (err) => {
+                Comment.findByIdAndUpdate(req.params.id, newComment, {})
+                .populate('author', 'first_name last_name')
+                .exec(function(err, results) {
                     if (err) {
                         return next(err)
                     } else {
