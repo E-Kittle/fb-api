@@ -8,7 +8,7 @@ const postController = require('../controllers/postController')
 router.post('/', userController.signup_user);
 
 // Returns posts and comments for a specific user
-router.get('/profile/:id/feed', postController.get_user_posts);
+router.get('/profile/:id/feed', passport.authenticate('jwt', {session: false}), postController.get_user_posts);
 
 // Returns the users profile data and friends
 router.get('/profile/:id', passport.authenticate('jwt', {session: false}), userController.get_profile);

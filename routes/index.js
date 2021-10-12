@@ -48,5 +48,6 @@ router.get('/session', passport.authenticate('jwt', { session: false }), userCon
 // Route to login user
 router.post('/session', userController.login_user);
 
+router.get('/users', passport.authenticate('jwt', { session: false }), userController.get_all_users)
 
 module.exports = router;

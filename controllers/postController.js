@@ -51,6 +51,14 @@ exports.get_posts = function (req, res, next) {
 exports.get_user_posts = function (req, res, next) {
     Post.find({ author: req.params.id })
         .populate('comments')
+        .populate({
+            path: 'comments',
+            populate: {
+                path: 'author',
+                model: 'User',
+                select: 'first_name last_name'
+            }
+        })
         .populate('author', 'first_name last_name')
         .exec((err, results) => {
             if (results) {

@@ -441,3 +441,15 @@ exports.find_user = function (req, res, next)  {
         })
     } 
 }
+
+exports.get_all_users = function (req, res, next) {
+    User.find({}, 'first_name last_name email')
+    
+    .exec((err, results) => {
+        if (err) {
+            return next(err)
+        } else {
+            res.status(200).json(results)
+        }
+    })
+}
