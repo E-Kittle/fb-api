@@ -4,7 +4,8 @@ const passport = require('passport');
 const userController = require('../controllers/userController');
 const postController = require('../controllers/postController');
 const commentController = require('../controllers/commentController');
-
+const multer  = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
 // ROUTES FOR POSTS
 // ----------------------------------------------------------------------------
@@ -13,7 +14,7 @@ const commentController = require('../controllers/commentController');
 router.get('/posts', passport.authenticate('jwt', { session: false }), postController.get_posts);
 
 // TESTED - Creates a new post
-router.post('/posts', passport.authenticate('jwt', { session: false }), postController.create_post);
+router.post('/posts', passport.authenticate('jwt', { session: false }), upload.single('photo'), postController.create_post);
 
 // TESTED Route to edit a post
 router.put('/post/:id', passport.authenticate('jwt', { session: false }), postController.edit_post);

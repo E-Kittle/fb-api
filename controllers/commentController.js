@@ -27,7 +27,7 @@ exports.create_comment = [
             } else {
                 // Post was found. Create the comment and update the posts comment array
                 let today = new Date();
-                let date = today.toDateString();
+                let date = today.toString();
                 // Comment may be a reply to another comment, if so, the comment id
                 // is stored in req.body. If it is not a reply, set commentRef to null
                 let ref;

@@ -1,7 +1,7 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
-
+const multer = require('multer');
 
 
 // Returns posts and comments for newsfeed
@@ -78,8 +78,10 @@ exports.create_post = [
     body('content', 'Content is required').escape().isLength({ min: 1 }).trim(),
 
     (req, res, next) => {
+        
         console.log(req.body.content)
         console.log('not working?')
+        console.log(req.file)
         // If there were errors, reject the submission and return the user
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
