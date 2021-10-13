@@ -5,7 +5,17 @@ const userController = require('../controllers/userController');
 const postController = require('../controllers/postController');
 const commentController = require('../controllers/commentController');
 const multer  = require('multer')
-const upload = multer({ dest: 'uploads/' })
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
+        cb(null, true)
+    } else {        //Reject any files that are not jpg, jpeg, or png
+        cb(null, false)
+    }    
+}
+
+//Configure multer + reject any files larger than 5 mb. 
+const upload = multer({ dest: 'uploads/', limits: {fileSize: 1024*1024*5}, fileFilter: fileFilter } )
 
 // ROUTES FOR POSTS
 // ----------------------------------------------------------------------------
@@ -14,7 +24,7 @@ const upload = multer({ dest: 'uploads/' })
 router.get('/posts', passport.authenticate('jwt', { session: false }), postController.get_posts);
 
 // TESTED - Creates a new post
-router.post('/posts', passport.authenticate('jwt', { session: false }), upload.single('photo'), postController.create_post);
+router.post('/posts', passport.authenticate('jwt', { session: false }), upload.array('photos', 4), postController.create_post);
 
 // TESTED Route to edit a post
 router.put('/post/:id', passport.authenticate('jwt', { session: false }), postController.edit_post);
