@@ -15,7 +15,8 @@ const fileFilter = (req, file, cb) => {
 }
 
 //Configure multer + reject any files larger than 5 mb. 
-const upload = multer({ dest: 'uploads/', limits: {fileSize: 1024*1024*5}, fileFilter: fileFilter } )
+// const upload = multer({ dest: 'uploads/', limits: {fileSize: 1024*1024*5}, fileFilter: fileFilter } )
+const upload = multer({ dest: 'uploads/'} )
 
 // ROUTES FOR POSTS
 // ----------------------------------------------------------------------------
@@ -24,7 +25,15 @@ const upload = multer({ dest: 'uploads/', limits: {fileSize: 1024*1024*5}, fileF
 router.get('/posts', passport.authenticate('jwt', { session: false }), postController.get_posts);
 
 // TESTED - Creates a new post
-router.post('/posts', passport.authenticate('jwt', { session: false }), upload.array('photos', 4), postController.create_post);
+router.post('/posts', passport.authenticate('jwt', { session: false }),
+function(req, res, next) {
+    console.log('before upload')
+    next()
+}, upload.array('photos', 2),
+function(req, res, next) {
+    console.log('after upload')
+    next()
+}, postController.create_post);
 
 // TESTED Route to edit a post
 router.put('/post/:id', passport.authenticate('jwt', { session: false }), postController.edit_post);

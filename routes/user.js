@@ -4,6 +4,10 @@ const passport = require('passport');
 const userController = require('../controllers/userController')
 const postController = require('../controllers/postController')
 
+//Import and configure multer
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' })
+
 // Signup new user
 router.post('/', userController.signup_user);
 
@@ -13,6 +17,8 @@ router.get('/profile/:id/feed', passport.authenticate('jwt', {session: false}), 
 // Returns the users profile data and friends
 router.get('/profile/:id', passport.authenticate('jwt', {session: false}), userController.get_profile);
 
+//Route to add a cover photo to user profile
+router.put('/profile/cover', upload.single('cover'), userController.update_cover);
 // ROUTES FOR MANAGING FRIENDS
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------
 

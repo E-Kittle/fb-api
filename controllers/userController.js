@@ -453,3 +453,10 @@ exports.get_all_users = function (req, res, next) {
         }
     })
 }
+
+exports.update_cover = function(req, res, next) {
+    //Takes in the new cover photo and appends it to the users file
+
+    console.log(req.file)
+    res.status(200).json({message:'success'})
+}

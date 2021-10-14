@@ -78,42 +78,44 @@ exports.create_post = [
     body('content', 'Content is required').escape().isLength({ min: 1 }).trim(),
 
     (req, res, next) => {
-
+        console.log(req.body)
         console.log(req.files)
         // If there were errors, reject the submission and return the user
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             res.status(400).json({ errArr: errors.array() })
-        }
+        } else {
 
-        // There were no errors, so create the new post
-        let today = new Date();
-        let date = today.toString();
-        
-        //Check if the user added a file
-        let pics=[];
 
-        if (req.files) {
-            // pics = path.join(__dirname, req.file.path);
-            pics = req.files.map(file => {
-                return file.path;
+            // There were no errors, so create the new post
+            let today = new Date();
+            let date = today.toString();
+
+            //Check if the user added a file
+            let pics = [];
+
+            if (req.files) {
+                // pics = path.join(__dirname, req.file.path);
+                pics = req.files.map(file => {
+                    return file.path;
+                })
+            }
+            newPost = new Post({
+                author: req.user.id,        //Only current users can make posts
+                content: req.body.content,  //Set in with body
+                date: date,
+                images: pics,
+                likes: [],                  //Comments and likes are updated later
+                comments: [],
             })
-        }
-        newPost = new Post({
-            author: req.user.id,        //Only current users can make posts
-            content: req.body.content,  //Set in with body
-            date: date,
-            images: pics,
-            likes: [],                  //Comments and likes are updated later
-            comments: [],
-        })
-            .save((err, result) => {
-                if (err) { return next(err) }
-                else {
-                    res.status(200).json({ message: 'new post created', post:result })
-                }
-            })
+                .save((err, result) => {
+                    if (err) { return next(err) }
+                    else {
+                        res.status(200).json({ message: 'new post created', post: result })
+                    }
+                })
 
+        }
     }
 ]
 
@@ -186,7 +188,7 @@ exports.delete_post = function (req, res, next) {
 exports.like_post = function (req, res, next) {
     // Grab the post data from the db. 
     Post.findById(req.params.id)
-    .populate('author', 'first_name last_name')
+        .populate('author', 'first_name last_name')
         .exec((err, results) => {
 
             if (results === undefined || results === null) {
