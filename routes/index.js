@@ -25,15 +25,10 @@ const upload = multer({ dest: 'uploads/'} )
 router.get('/posts', passport.authenticate('jwt', { session: false }), postController.get_posts);
 
 // TESTED - Creates a new post
-router.post('/posts', passport.authenticate('jwt', { session: false }),
-function(req, res, next) {
-    console.log('before upload')
-    next()
-}, upload.array('photos', 2),
-function(req, res, next) {
-    console.log('after upload')
-    next()
-}, postController.create_post);
+router.post('/posts', passport.authenticate('jwt', { session: false }), postController.create_post);
+
+//Route to add photos to a post
+router.put('/post/:id/photos', upload.array('photos', 4), postController.add_post_images);
 
 // TESTED Route to edit a post
 router.put('/post/:id', passport.authenticate('jwt', { session: false }), postController.edit_post);

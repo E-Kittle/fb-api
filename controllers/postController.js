@@ -78,33 +78,21 @@ exports.create_post = [
     body('content', 'Content is required').escape().isLength({ min: 1 }).trim(),
 
     (req, res, next) => {
-        console.log(req.body)
-        console.log(req.files)
         // If there were errors, reject the submission and return the user
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             res.status(400).json({ errArr: errors.array() })
         } else {
 
-
             // There were no errors, so create the new post
             let today = new Date();
             let date = today.toString();
 
             //Check if the user added a file
-            let pics = [];
-
-            if (req.files) {
-                // pics = path.join(__dirname, req.file.path);
-                pics = req.files.map(file => {
-                    return file.path;
-                })
-            }
             newPost = new Post({
                 author: req.user.id,        //Only current users can make posts
                 content: req.body.content,  //Set in with body
                 date: date,
-                images: pics,
                 likes: [],                  //Comments and likes are updated later
                 comments: [],
             })
@@ -114,10 +102,29 @@ exports.create_post = [
                         res.status(200).json({ message: 'new post created', post: result })
                     }
                 })
-
         }
     }
 ]
+
+exports.add_post_images = function (req, res, next) {
+    console.log(req.files)
+
+    Post.findById(req.params.id)
+        .exec((err, results) => {
+
+            let pics = req.files.map(file => {
+                return file.path;
+            })
+            let newPost = results;
+            newPost.images = pics;
+            Post.findByIdAndUpdate(req.params.id, newPost, {}, ((err, response) => {
+                res.status(200).json({ message: 'images updated', post: response })
+            }))
+
+        }
+        )
+}
+
 
 // Edits a post
 exports.edit_post =
