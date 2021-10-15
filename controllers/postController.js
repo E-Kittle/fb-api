@@ -146,7 +146,17 @@ exports.edit_post =
                 // post error handling
                 if (result == undefined) {
                     res.status(400).json({ message: 'No such post found' })
-                } else {
+                } else if (req.body.content==='Deleted'){
+                    let newPost = result;
+                    result.content='Deleted';
+                    result.images = []
+                    Post.findByIdAndUpdate(req.params.id, newPost, {}, (err) => {
+                        if (err) { return next(err) }
+                        else {
+                            res.status(200).json({ message: 'Post successfully deleted' })
+                        }
+                    })
+                }else {
                     // Post was found, update and save
                     let newPost = result;
                     newPost.content = req.body.content;
