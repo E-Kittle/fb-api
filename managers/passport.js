@@ -24,8 +24,8 @@ passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
             first_name: returnedUser.first_name,
             last_name: returnedUser.last_name,
             email: returnedUser.email,
-            friends: returnedUser.friends
-            // temp_img: returnedUser.temp_img
+            friends: returnedUser.friends,
+            cover_img: returnedUser.cover_img
         }
 
         // If there is an error, return the error

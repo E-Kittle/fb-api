@@ -62,7 +62,7 @@ exports.login_user = function (req, res, next) {
 
     //Check if user exists in the database
     User.findOne({ email })
-        .populate('friends', 'first_name last_name')
+        .populate('friends', 'first_name last_name cover_img')
         .then(user => {
             if (!user) {
                 //User doesn't exist, return error message
@@ -83,7 +83,8 @@ exports.login_user = function (req, res, next) {
                             first_name: user.first_name,
                             last_name: user.last_name,
                             email: user.email,
-                            friends: user.friends
+                            friends: user.friends,
+                            cover_img: user.cover_img
                         }
 
                         // Return success to client
@@ -117,7 +118,7 @@ exports.get_user_friends = function (req, res, next) {
     if (req.query.all && id == req.user.id) {
         async.parallel({
             friends: function (callback) {
-                User.findById(id).populate('friends', 'first_name last_name').exec(callback)
+                User.findById(id).populate('friends', 'first_name last_name cover_img').exec(callback)
             },
             friend_requests: function (callback) {
                 FriendRequest.find({
@@ -126,8 +127,8 @@ exports.get_user_friends = function (req, res, next) {
                         { requested: id }
                     ]
                 })
-                    .populate('requestee', 'first_name last_name')
-                    .populate('requested', 'first_name last_name')
+                    .populate('requestee', 'first_name last_name cover_img')
+                    .populate('requested', 'first_name last_name cover_img')
                     .exec(callback)
             }
         }, function (err, results) {
@@ -136,14 +137,22 @@ exports.get_user_friends = function (req, res, next) {
     } else {
         // Client only wants current friends
         User.findById(id)
-            .populate('friends', 'first_name last_name')
+            .populate('friends', 'first_name last_name cover_img')
             .exec(function (err, user) {
                 if (user === undefined) {
                     res.status(400).json({ message: 'No user found with that id' })
                 } else if (err) {
                     return next(err)
                 } else {
-                    res.status(200).json(user)
+                    let theuser = {
+                        id: user._id,
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        email: user.email,
+                        friends: user.friends,
+                        cover_img: user.cover_img
+                    }
+                    res.status(200).json({user:theuser})
                 }
             })
     }
@@ -158,8 +167,8 @@ exports.get_friend_requests = function (req, res, next) {
             { requested: req.user.id }
         ]
     })
-        .populate('requestee', 'first_name last_name')
-        .populate('requested', 'first_name last_name')
+        .populate('requestee', 'first_name last_name cover_img')
+        .populate('requested', 'first_name last_name cover_img')
         .exec((err, results) => {
             res.status(200).json({ results })
         })
@@ -356,7 +365,7 @@ exports.remove_friend = function (req, res, next) {
 // Delete an existing friend
 exports.get_profile = function (req, res, next) {
     User.findById(req.params.id)
-    .populate('friends', 'first_name last_name email') 
+    .populate('friends', 'first_name last_name email cover_img') 
     .exec((err, results) => {
         if (results === undefined || results === null) {
             // No such request
@@ -377,7 +386,8 @@ exports.get_profile = function (req, res, next) {
                 let person= {
                     _id: friend._id,
                     first_name: friend.first_name,
-                    last_name: friend.last_name
+                    last_name: friend.last_name,
+                    cover_img: friend.cover_img
                 }
                 friendList.push(person)
             })
@@ -413,7 +423,8 @@ exports.find_user = function (req, res, next)  {
                     let newPerson = {
                         'first_name': person.first_name,
                         'last_name': person.last_name,
-                        '_id': person._id
+                        '_id': person._id,
+                        cover_img: person.cover_img
                     }
                     theResults.push(newPerson)
                 })
@@ -434,7 +445,8 @@ exports.find_user = function (req, res, next)  {
                     let newPerson = {
                         'first_name': person.first_name,
                         'last_name': person.last_name,
-                        '_id': person._id
+                        '_id': person._id,
+                        cover_img: person.cover_img
                     }
                     theResults.push(newPerson)
                 })
@@ -445,7 +457,7 @@ exports.find_user = function (req, res, next)  {
 }
 
 exports.get_all_users = function (req, res, next) {
-    User.find({}, 'first_name last_name email')
+    User.find({}, 'first_name last_name email cover_img')
     
     .exec((err, results) => {
         if (err) {
