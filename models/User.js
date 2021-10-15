@@ -8,8 +8,8 @@ let UserSchema = new Schema(
         email: {type:String, required:true, unique:true},
         password: {type:String, required:true},
         bio: {type:String},
-        profile_img: {type:String},
-        cover_img: {type:String},  
+        profile_img: {type:String, required:false},
+        cover_img: {type:String, required:false},  
         friends: [{type:Schema.Types.ObjectId, ref:'User'}]
     }
 )

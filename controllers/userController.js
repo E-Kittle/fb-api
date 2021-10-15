@@ -356,18 +356,20 @@ exports.remove_friend = function (req, res, next) {
 // Delete an existing friend
 exports.get_profile = function (req, res, next) {
     User.findById(req.params.id)
-    .populate('friends') 
+    .populate('friends', 'first_name last_name email') 
     .exec((err, results) => {
         if (results === undefined || results === null) {
             // No such request
             res.status(400).json({ message: "No request found with that id" })
         } else if (results) {
+            console.log(results)
             let user = {
                 _id: results._id,
                 first_name: results.first_name,
                 last_name: results.last_name,
                 email: results.email,
-                bio: results.bio
+                bio: results.bio,
+                cover_img: results.cover_img,
             }
 
             let friendList = [];
@@ -456,7 +458,38 @@ exports.get_all_users = function (req, res, next) {
 
 exports.update_cover = function(req, res, next) {
     //Takes in the new cover photo and appends it to the users file
+    User.findById(req.params.id)
+    .exec((err, result) => {
+        if(err) {
+            return next(err);
+        } else {
+            let tempUser = result;
+            tempUser.cover_img= req.file.path;
+            User.findByIdAndUpdate(req.params.id, tempUser, {}, (err, result) => {
+                if (err) { return next(err) }
+                else {
+                    res.status(200).json({ message: 'Profile successfully updated!' })
+                }
+            })
+        }
+    })
+}
 
-    console.log(req.file)
-    res.status(200).json({message:'success'})
+exports.update_profile = function(req, res, next) {
+    //Takes in the new cover photo and appends it to the users file
+    User.findById(req.params.id)
+    .exec((err, result) => {
+        if(err) {
+            return next(err);
+        } else {
+            let tempUser = result;
+            tempUser.profile_img= req.file.path;
+            User.findByIdAndUpdate(req.params.id, tempUser, {}, (err, result) => {
+                if (err) { return next(err) }
+                else {
+                    res.status(200).json({ message: 'Profile successfully updated!' })
+                }
+            })
+        }
+    })
 }

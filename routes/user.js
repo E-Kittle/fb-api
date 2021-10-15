@@ -18,7 +18,11 @@ router.get('/profile/:id/feed', passport.authenticate('jwt', {session: false}), 
 router.get('/profile/:id', passport.authenticate('jwt', {session: false}), userController.get_profile);
 
 //Route to add a cover photo to user profile
-router.put('/profile/cover', upload.single('cover'), userController.update_cover);
+router.put('/profile/:id/cover', upload.single('cover'), userController.update_cover);
+
+//Route to add a profile photo to user profile
+router.put('/profile/:id/profileupdate', upload.single('profile'), userController.update_profile);
+
 // ROUTES FOR MANAGING FRIENDS
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
