@@ -9,6 +9,7 @@ require('dotenv').config();
 
 // Used to authenticate the token when user is returning to site
 exports.auth_user = function (req, res, next) {
+    console.log(req.user)
     return res.status(200).json({ user: req.user });
 }
 
@@ -86,7 +87,7 @@ exports.login_user = function (req, res, next) {
                             friends: user.friends,
                             cover_img: user.cover_img
                         }
-
+                        console.log(theUser)
                         // Return success to client
                         res.status(200).json({
                             message: 'Authentication Successful',
@@ -480,7 +481,7 @@ exports.update_cover = function(req, res, next) {
             User.findByIdAndUpdate(req.params.id, tempUser, {}, (err, result) => {
                 if (err) { return next(err) }
                 else {
-                    res.status(200).json({ message: 'Profile successfully updated!' })
+                    res.status(200).json({ message: 'Profile successfully updated!', cover_img: req.file.path })
                 }
             })
         }
@@ -499,7 +500,7 @@ exports.update_profile = function(req, res, next) {
             User.findByIdAndUpdate(req.params.id, tempUser, {}, (err, result) => {
                 if (err) { return next(err) }
                 else {
-                    res.status(200).json({ message: 'Profile successfully updated!' })
+                    res.status(200).json({ message: 'Profile successfully updated!', profile_img: req.file.path })
                 }
             })
         }

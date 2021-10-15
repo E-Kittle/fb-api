@@ -17,7 +17,7 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
 
     User.findById(jwt_payload.user._id)
-    .populate('friends', 'first_name last_name')
+    .populate('friends', 'first_name last_name cover_img')
     .exec(function (err, returnedUser) {
         const user = {
             id: returnedUser._id,

@@ -28,10 +28,10 @@ exports.get_posts = function (req, res, next) {
                         populate: {
                             path: 'author',
                             model: 'User',
-                            select: 'first_name last_name'
+                            select: 'first_name last_name cover_img'
                         }
                     })
-                    .populate('author', 'first_name last_name')
+                    .populate('author', 'first_name last_name cover_img')
                     .exec((err, filterResults) => {
                         res.status(200).json(filterResults)
                     })
@@ -56,10 +56,10 @@ exports.get_user_posts = function (req, res, next) {
             populate: {
                 path: 'author',
                 model: 'User',
-                select: 'first_name last_name'
+                select: 'first_name last_name cover_img'
             }
         })
-        .populate('author', 'first_name last_name')
+        .populate('author', 'first_name last_name cover_img')
         .exec((err, results) => {
             if (results) {
                 res.status(200).json(results)
