@@ -29,7 +29,7 @@ app.set('view engine', 'pug');
 
 //Middleware
 app.use(cors({
-  origin: 'http://localhost:3000'
+  origin: 'http://www.odinbook.elisabethoconnor.com/'
 }))
 
 app.use(logger('dev'));
