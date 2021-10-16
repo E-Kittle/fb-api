@@ -35,23 +35,18 @@ router.get('/:id/friends', passport.authenticate('jwt', { session: false }), use
 
 
 // Grabs friend requests
-//TESTED
 router.get('/friendreq', passport.authenticate('jwt', { session: false }), userController.get_friend_requests);
 
 //Create a new friend request
-//TESTED
 router.post('/friend/:id', passport.authenticate('jwt', { session: false }), userController.create_friend_request);
 
 // Delete a friend 
-// TESTED
 router.delete('/friend/:id', passport.authenticate('jwt', { session: false }), userController.remove_friend);
 
 // Reject a friend request
-//TESTED 
 router.delete('/friendreq/:reqid', passport.authenticate('jwt', { session: false }), userController.reject_friend_request);
 
 // accept a friend request
-//TESTED
 router.put('/friendreq/:reqid', passport.authenticate('jwt', { session: false }), userController.accept_friend_request);
 
 // Searches for an existing user

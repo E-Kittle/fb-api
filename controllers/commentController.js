@@ -8,7 +8,6 @@ exports.create_comment = [
     //Post id is saved in req.params.id
 
     // Validate and sanitize data
-    // Content isn't necessarily required. User could just be posting an image
     body('content', 'Content is required').isLength({ min: 1 }).escape().trim(),
 
     (req, res, next) => {
@@ -62,10 +61,8 @@ exports.create_comment = [
 
 // Edits a comment
 exports.edit_comment =
-    [
-        // Validate and sanitize data
+    [        // Validate and sanitize data
         body('content', 'Content is required').escape().trim(),
-
 
         function (req, res, next) {
 

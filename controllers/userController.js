@@ -27,7 +27,7 @@ exports.signup_user = [
             // There were errors during validation, return 
             res.status(400).json({ errArr: errors.array() });
         } else {
-            // There were no users, has the password and save the user
+            // There were no users, hash the password and save the user
             bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
                 let userDetail = {
                     first_name: req.body.first_name,
@@ -153,7 +153,7 @@ exports.get_user_friends = function (req, res, next) {
                         friends: user.friends,
                         cover_img: user.cover_img
                     }
-                    res.status(200).json({user:theuser})
+                    res.status(200).json({ user: theuser })
                 }
             })
     }
@@ -244,14 +244,14 @@ exports.reject_friend_request = function (req, res, next) {
         if (err) {
             // If an error occurs, check if its due to an invalid id
             if (err.kind = 'ObjectId') {
-                res.status(400).json({message: 'failed due to invalid id'})
-            } else{
-                return next(err) 
+                res.status(400).json({ message: 'failed due to invalid id' })
+            } else {
+                return next(err)
             }
         }
         else {
             // success! Send success data
-            res.status(200).json({ message: 'Deleted request:'})
+            res.status(200).json({ message: 'Deleted request:' })
         }
     })
 }
@@ -331,7 +331,7 @@ exports.remove_friend = function (req, res, next) {
         function (err, results) {
             if (results.friend === undefined) {
                 // Return error, no user found by that id
-                res.status(400).json({message:'No such friend found'})
+                res.status(400).json({ message: 'No such friend found' })
             } else if (err) {
                 // Error handling
                 return next(err)
@@ -366,145 +366,149 @@ exports.remove_friend = function (req, res, next) {
 // Delete an existing friend
 exports.get_profile = function (req, res, next) {
     User.findById(req.params.id)
-    .populate('friends', 'first_name last_name email cover_img') 
-    .exec((err, results) => {
-        if (results === undefined || results === null) {
-            // No such request
-            res.status(400).json({ message: "No request found with that id" })
-        } else if (results) {
-            console.log('results')
-            console.log(results)
-            let user = {
-                _id: results._id,
-                first_name: results.first_name,
-                last_name: results.last_name,
-                email: results.email,
-                bio: results.bio,
-                cover_img: results.cover_img,
-                profile_img: results.profile_img
+        .populate('friends', 'first_name last_name email cover_img')
+        .exec((err, results) => {
+            if (results === undefined || results === null) {
+                // No such request
+                res.status(400).json({ message: "No request found with that id" })
+            } else if (results) {
+                let user = {
+                    _id: results._id,
+                    first_name: results.first_name,
+                    last_name: results.last_name,
+                    email: results.email,
+                    bio: results.bio,
+                    cover_img: results.cover_img,
+                    profile_img: results.profile_img
+                }
+
+                let friendList = [];
+                results.friends.map(friend => {
+                    let person = {
+                        _id: friend._id,
+                        first_name: friend.first_name,
+                        last_name: friend.last_name,
+                        cover_img: friend.cover_img
+                    }
+                    friendList.push(person)
+                })
+
+                res.status(200).json({ user: user, friends: friendList })
+            } else {
+                // Error handling
+                return next(err);
             }
 
-            let friendList = [];
-            results.friends.map(friend => {
-                let person= {
-                    _id: friend._id,
-                    first_name: friend.first_name,
-                    last_name: friend.last_name,
-                    cover_img: friend.cover_img
-                }
-                friendList.push(person)
-            })
-
-            res.status(200).json({user:user, friends:friendList})
-        } else {
-            // Error handling
-            return next(err);
-        }
-
-    })
+        })
 }
 
 
 
 // Function to find a user in the database
-exports.find_user = function (req, res, next)  {
+exports.find_user = function (req, res, next) {
     const search = req.params.id.split('+')
     let theResults = [];
 
+    // User is running a basic search such as: 'b' or 'bob'
+    // Try to match start of word with users first or last name
     if (search.length === 1) {
         User.find({
             $or: [
-                {'first_name': { "$regex": `^${search[0]}`, "$options":'i'}},
-                {'last_name': { "$regex": `^${search[0]}`, "$options":'i'}}
+                { 'first_name': { "$regex": `^${search[0]}`, "$options": 'i' } },
+                { 'last_name': { "$regex": `^${search[0]}`, "$options": 'i' } }
             ]
         })
-        .exec((err, results) => {
-            if (err) {
-                return next(err);
-            } else {
-                results.map(person => {
-                    let newPerson = {
-                        'first_name': person.first_name,
-                        'last_name': person.last_name,
-                        '_id': person._id,
-                        cover_img: person.cover_img
-                    }
-                    theResults.push(newPerson)
-                })
-                res.status(200).json({message: 'worked', search: theResults})
-            }
-        })
-        
+            .exec((err, results) => {
+                if (err) {
+                    return next(err);
+                } else {
+                    //Filter out private data and return to client
+                    results.map(person => {
+                        let newPerson = {
+                            'first_name': person.first_name,
+                            'last_name': person.last_name,
+                            '_id': person._id,
+                            cover_img: person.cover_img
+                        }
+                        theResults.push(newPerson)
+                    })
+                    res.status(200).json({ message: 'worked', search: theResults })
+                }
+            })
+
     } else {
         // client has submitted their search in 'first last' format, run search accordingly
         User.find(
-                {'first_name': { "$regex": `^${search[0]}`, "$options":'i'}, 'last_name': { "$regex": `^${search[1]}`, "$options":'i'}}
+            { 'first_name': { "$regex": `^${search[0]}`, "$options": 'i' }, 'last_name': { "$regex": `^${search[1]}`, "$options": 'i' } }
         )
+            .exec((err, results) => {
+                if (err) {
+                    return next(err);
+                } else {
+                    results.map(person => {
+                        let newPerson = {
+                            'first_name': person.first_name,
+                            'last_name': person.last_name,
+                            '_id': person._id,
+                            cover_img: person.cover_img
+                        }
+                        theResults.push(newPerson)
+                    })
+                    res.status(200).json({ message: 'worked', search: theResults })
+                }
+            })
+    }
+}
+
+//Get all users from the db 
+exports.get_all_users = function (req, res, next) {
+    User.find({}, 'first_name last_name email cover_img')
+
         .exec((err, results) => {
+            if (err) {
+                return next(err)
+            } else {
+                res.status(200).json(results)
+            }
+        })
+}
+
+//This method takes in the new cover photo and appends it to the users file
+exports.update_cover = function (req, res, next) {
+    User.findById(req.params.id)
+        .exec((err, result) => {
             if (err) {
                 return next(err);
             } else {
-                results.map(person => {
-                    let newPerson = {
-                        'first_name': person.first_name,
-                        'last_name': person.last_name,
-                        '_id': person._id,
-                        cover_img: person.cover_img
+                // Found user, update data
+                let tempUser = result;
+                tempUser.cover_img = req.file.path;
+                User.findByIdAndUpdate(req.params.id, tempUser, {}, (err, result) => {
+                    if (err) { return next(err) }
+                    else {
+                        res.status(200).json({ message: 'Profile successfully updated!', cover_img: req.file.path })
                     }
-                    theResults.push(newPerson)
                 })
-                res.status(200).json({message: 'worked', search: theResults})
             }
         })
-    } 
 }
 
-exports.get_all_users = function (req, res, next) {
-    User.find({}, 'first_name last_name email cover_img')
-    
-    .exec((err, results) => {
-        if (err) {
-            return next(err)
-        } else {
-            res.status(200).json(results)
-        }
-    })
-}
-
-exports.update_cover = function(req, res, next) {
-    //Takes in the new cover photo and appends it to the users file
+//This method takes in the new cover photo and appends it to the users file
+exports.update_profile = function (req, res, next) {
     User.findById(req.params.id)
-    .exec((err, result) => {
-        if(err) {
-            return next(err);
-        } else {
-            let tempUser = result;
-            tempUser.cover_img= req.file.path;
-            User.findByIdAndUpdate(req.params.id, tempUser, {}, (err, result) => {
-                if (err) { return next(err) }
-                else {
-                    res.status(200).json({ message: 'Profile successfully updated!', cover_img: req.file.path })
-                }
-            })
-        }
-    })
-}
-
-exports.update_profile = function(req, res, next) {
-    //Takes in the new cover photo and appends it to the users file
-    User.findById(req.params.id)
-    .exec((err, result) => {
-        if(err) {
-            return next(err);
-        } else {
-            let tempUser = result;
-            tempUser.profile_img= req.file.path;
-            User.findByIdAndUpdate(req.params.id, tempUser, {}, (err, result) => {
-                if (err) { return next(err) }
-                else {
-                    res.status(200).json({ message: 'Profile successfully updated!', profile_img: req.file.path })
-                }
-            })
-        }
-    })
+        .exec((err, result) => {
+            if (err) {
+                return next(err);
+            } else {
+                // Found user, update data
+                let tempUser = result;
+                tempUser.profile_img = req.file.path;
+                User.findByIdAndUpdate(req.params.id, tempUser, {}, (err, result) => {
+                    if (err) { return next(err) }
+                    else {
+                        res.status(200).json({ message: 'Profile successfully updated!', profile_img: req.file.path })
+                    }
+                })
+            }
+        })
 }

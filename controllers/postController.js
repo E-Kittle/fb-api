@@ -40,9 +40,25 @@ exports.get_posts = function (req, res, next) {
             } else if (err) {
                 return next(err)
             } else {
-                // A user was found but they do not have any friends
-                // Allow client to determine best course
-                res.status(200).json({ message: "User doesn't have friends", new: true })
+                // A user was found, but they do not have friends. Just pull their posts
+                Post.find({author:req.user.id})
+                .populate('comments')
+                .populate({
+                    path: 'comments',
+                    populate: {
+                        path: 'author',
+                        model: 'User',
+                        select: 'first_name last_name cover_img'
+                    }
+                })
+                .populate('author', 'first_name last_name cover_img')
+                .exec((err, results) => {
+                    if (results) {
+                        res.status(200).json(results)
+                    } else {
+                        return next(err)
+                    }
+                })
             }
         })
 }
@@ -106,20 +122,28 @@ exports.create_post = [
     }
 ]
 
+// Method to add images to a post
 exports.add_post_images = function (req, res, next) {
-    console.log(req.files)
 
+    //Find the post
     Post.findById(req.params.id)
         .exec((err, results) => {
 
-            let pics = req.files.map(file => {
-                return file.path;
-            })
-            let newPost = results;
-            newPost.images = pics;
-            Post.findByIdAndUpdate(req.params.id, newPost, {}, ((err, response) => {
-                res.status(200).json({ message: 'images updated', post: response })
-            }))
+            if (req.files.length === 0) {
+                res.status(400).json({message: 'file not accepted'})
+            } else {
+
+                //Add the images to the post
+                let pics = req.files.map(file => {
+                    return file.path;
+                })
+                let newPost = results;
+                newPost.images = pics;
+                //Update db
+                Post.findByIdAndUpdate(req.params.id, newPost, {}, ((err, response) => {
+                    res.status(200).json({ message: 'images updated', post: response })
+                }))
+            }
 
         }
         )
@@ -141,16 +165,17 @@ exports.edit_post =
                 res.status(400).json({ errArr: errors.array() })
             }
 
-            // requires authentication - Must be author
+            // Find the post in the db
             Post.findById(req.params.id, (err, result) => {
                 // post error handling
                 if (result == undefined) {
                     res.status(400).json({ message: 'No such post found' })
                 } else if (req.body.content==='Deleted'){
+                    //If req.body.content is 'deleted', just replace the text content and remove the images
                     let newPost = result;
                     result.content='Deleted';
                     result.images = []
-                    Post.findByIdAndUpdate(req.params.id, newPost, {}, (err) => {
+                    Post.findByIdAndUpdate(req.params.id, newPost, {}, (err) => { //update db
                         if (err) { return next(err) }
                         else {
                             res.status(200).json({ message: 'Post successfully deleted' })
@@ -172,7 +197,9 @@ exports.edit_post =
     ]
 
 
-// Delets a post
+// Delets a post - Not currently in use as it makes more sense for client
+// to replace text content with 'deleted' so that any comments can still be
+// read if there's an active discussion
 exports.delete_post = function (req, res, next) {
     // Grab post data, necessary to ensure that it is the author deleting the post
     Post.findById(req.params.id)
