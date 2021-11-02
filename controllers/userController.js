@@ -74,7 +74,7 @@ exports.login_user = function (req, res, next) {
                     if (result) {
                         //Authentication passed, create the token and return it to the client
                         const opts = {};
-                        opts.expiresIn = 60 * 60;
+                        opts.expiresIn = '2 days';
                         const secret = process.env.SECRET;
                         const token = jwt.sign({ user }, secret, opts);
 
@@ -496,7 +496,7 @@ exports.update_cover = function (req, res, next) {
 //This method takes in the new cover photo and appends it to the users file
 exports.update_profile = function (req, res, next) {
     User.findById(req.params.id)
-        .exec((err, result) => {
+    .exec((err, result) => {
             if (err) {
                 return next(err);
             } else {

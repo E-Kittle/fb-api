@@ -4,20 +4,24 @@ const passport = require('passport');
 const userController = require('../controllers/userController');
 const postController = require('../controllers/postController');
 const commentController = require('../controllers/commentController');
-const multer  = require('multer')
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const multer = require('multer');
+require('dotenv').config();         //Import environmental variables
 
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
-        cb(null, true)
-    } else {        //Reject any files that are not jpg, jpeg, or png
-        cb(null, false)
-    }    
-}
 
-//Configure multer + reject any files larger than 5 mb. 
-const upload = multer({ dest: 'uploads/', limits: {fileSize: 1024*1024*5}, fileFilter: fileFilter } )
-// const upload = multer({ dest: 'uploads/'} )
-
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_KEY,
+    api_secret: process.env.CLOUD_SECRET
+});
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    folder: "demo",
+    allowedFormats: ["jpg", "png", "jpeg"],
+    transformation: [{ width: 500, height: 500, crop: "limit" }]
+});
+const parser = multer({ storage: storage });
 // ROUTES FOR POSTS
 // ----------------------------------------------------------------------------
 
@@ -28,7 +32,7 @@ router.get('/posts', passport.authenticate('jwt', { session: false }), postContr
 router.post('/posts', passport.authenticate('jwt', { session: false }), postController.create_post);
 
 //Route to add photos to a post
-router.put('/post/:id/photos', upload.array('photos', 4), postController.add_post_images);
+router.put('/post/:id/photos', parser.array('photos', 4), postController.add_post_images);
 
 // Route to edit a post
 router.put('/post/:id', passport.authenticate('jwt', { session: false }), postController.edit_post);

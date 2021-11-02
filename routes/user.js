@@ -3,25 +3,39 @@ var router = express.Router();
 const passport = require('passport');
 const userController = require('../controllers/userController')
 const postController = require('../controllers/postController')
-
-//Import and configure multer
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' })
+require('dotenv').config();         //Import environmental variables
+
+//configure multer and cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_KEY,
+    api_secret: process.env.CLOUD_SECRET
+});
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    folder: "demo",
+    allowedFormats: ["jpg", "png", "jpeg"],
+    transformation: [{ width: 500, height: 500, crop: "limit" }]
+});
+const parser = multer({ storage: storage });
 
 // Signup new user
 router.post('/', userController.signup_user);
 
 // Returns posts and comments for a specific user
-router.get('/profile/:id/feed', passport.authenticate('jwt', {session: false}), postController.get_user_posts);
+router.get('/profile/:id/feed', passport.authenticate('jwt', { session: false }), postController.get_user_posts);
 
 // Returns the users profile data and friends
-router.get('/profile/:id', passport.authenticate('jwt', {session: false}), userController.get_profile);
+router.get('/profile/:id', passport.authenticate('jwt', { session: false }), userController.get_profile);
 
 //Route to add a cover photo to user profile
-router.put('/profile/:id/cover', upload.single('cover'), userController.update_cover);
+router.put('/profile/:id/cover', parser.single('cover'), userController.update_cover);
 
 //Route to add a profile photo to user profile
-router.put('/profile/:id/profileupdate', upload.single('profile'), userController.update_profile);
+router.put('/profile/:id/profileupdate', parser.single('profile'), userController.update_profile);
 
 // ROUTES FOR MANAGING FRIENDS
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------
