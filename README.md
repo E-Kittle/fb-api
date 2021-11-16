@@ -6,7 +6,7 @@ This application is the API for Odinbook.
 
 
 ## Demo
-A live demo is available at: [OdinBook](odinbook.elisabethoconnor.com)
+A live demo is available at: [OdinBook](http://odinbook.elisabethoconnor.com)
 ![Screenshot of Demo](/public/images/odinbook.png)
 
 ## Features
@@ -35,5 +35,5 @@ $ npm run
 ## Configuration
 In order to properly run this application, you will your own environmental variables.
 The required variables are as follows:
- - DB_URL : For your database
+ - DB_URL: For your database
  - SECRET: For your JWT key
