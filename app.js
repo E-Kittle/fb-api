@@ -29,8 +29,8 @@ app.set('view engine', 'pug');
 
 //Middleware
 app.use(cors({
-  // origin: /\.elisabethoconnor\.com$/
-    origin: 'http://localhost:3000'
+  origin: /\.elisabethoconnor\.com$/
+    // origin: 'http://localhost:3000'
 }))
 
 app.use(logger('dev'));
